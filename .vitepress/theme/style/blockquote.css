@@ -1,0 +1,8 @@
+/* .vitepress/theme/style/blockquote.css */
+.vp-doc blockquote {
+    border-radius: 5px;
+    padding: 10px 20px 10px 15px;
+    position: relative;
+    background-color: var(--vp-c-gray-soft);
+    border-left: 2px solid var(--vp-c-green-2);
+}

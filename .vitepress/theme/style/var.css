@@ -1,0 +1,41 @@
+:root {
+  /* 渐变色 */
+  --vp-home-hero-name-background: linear-gradient(
+    135deg,
+    #77c6ff 10%,
+    #ff0084 100%
+  );
+  /* 纯色 */
+  /* --vp-home-hero-name-background: red; */
+  /* 图标背景 */
+  /* 设置线性渐变 */
+  --vp-home-hero-image-background-image: linear-gradient(
+    135deg,
+    #c9f6ff 10%,
+    #88a6ff 100%
+  );
+    --vp-layout-max-width: 100%;
+
+  /* 设置模糊度 */
+  --vp-home-hero-image-filter: blur(150px);
+}
+/*无下划线*/
+.vp-doc a {
+    text-decoration: none;
+}
+/* .vitepress/theme/style/var.css */
+
+/* VPFeatures 页卡悬浮效果 */
+.VPFeatures .items .item {
+  transition: transform 0.2s;
+}
+
+.VPFeatures .items .item:hover {
+  transform: translateY(-5px);
+}
+.VPHero .image img {
+  width: 250px !important;   /* 你可以改成更大，比如 160px、200px */
+  height: 250px !important;
+  max-width: none !important;
+  max-height: none !important;
+}

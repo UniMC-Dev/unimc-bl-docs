@@ -1,0 +1,6 @@
+/* index.css */
+@import "./var.css";
+@import './blockquote.css';
+@import './blur.css';
+@import './custom-block.css';
+@import './hidden.css';
