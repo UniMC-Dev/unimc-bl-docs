@@ -23,7 +23,7 @@
 
     --custom-block-caution-left: #a0522d;
     --custom-block-caution-bg: #f9f3ef;
-    --vp-c-bg-soft: #aeaeae;
+    --vp-c-yellow-soft: #aeaeae;
 }
 
 .dark {
@@ -49,7 +49,7 @@
 
     --custom-block-caution-left: #a0522d;
     --custom-block-caution-bg: #33261e;
-    --vp-c-bg-soft: #aeaeae;
+    --vp-c-yellow-soft: #aeaeae;
 }
 
 
