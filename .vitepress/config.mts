@@ -105,6 +105,9 @@ text: 'UNIMC官网',link: 'https://www.unimc.homes'
                     },
                     {
                       text: '命令', link: '/docs/mclume/play/命令'
+                    },
+                    {
+                      text: '互通绑定', link: '/docs/mclume/play/互通绑定'
                     }
                   ]
                 }
