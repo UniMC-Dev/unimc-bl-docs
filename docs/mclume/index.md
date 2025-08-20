@@ -17,7 +17,7 @@ next:
 
 若设备允许，我们强烈建议你使用java版进入
 
-[【!不完善】基岩Java账号互通，仅能互通货币数据](/docs/mclume/play/互通绑定)
+[【互通绑定!不完善】基岩Java账号互通，仅能互通货币数据](/docs/mclume/play/互通绑定)
 :::
 - **主服版本：1.21.4，可跨版本进入**
  
@@ -35,4 +35,5 @@ next:
 - **服务器 [官网](https://www.mcpool.net)**
  
 - **UNIMC [论坛](https://bbs.unimc.homes)**
+
 
