@@ -8,7 +8,7 @@ next:
 ## 服务器简介:star:
 - **中文名**：麦熙
 - **腐竹**：老八、Koshca
-- **服务器IP：ml.unimc.homes**
+- **服务器IP：mc.unimc.homes**
  
 :::tip 基岩版端口：29810（IP同上）
 基岩版玩家请将ui切换为经典，获得最好的体验
@@ -17,7 +17,7 @@ next:
 
 若设备允许，我们强烈建议你使用java版进入
 
-[基岩版绑定java账号实现数据互通](/docs/mclume/play/互通绑定)
+[【!不完善】基岩Java账号互通，仅能互通货币数据](/docs/mclume/play/互通绑定)
 :::
 - **主服版本：1.21.4，可跨版本进入**
  
@@ -35,3 +35,4 @@ next:
 - **服务器 [官网](https://www.mcpool.net)**
  
 - **UNIMC [论坛](https://bbs.unimc.homes)**
+
