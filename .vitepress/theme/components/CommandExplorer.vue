@@ -113,6 +113,18 @@ const commands = ref([
     usage: '/shop'
   },
   {
+    name: '/fp',
+    categories: ['其他'],
+    description: '查询bot用法(人间&乐土)',
+    usage: '/fp help'
+  },
+  {
+    name: '/bot',
+    categories: ['其他'],
+    description: '查询bot用法(乐土)',
+    usage: '/bot'
+  },
+  {
     name: '/menu',
     categories: ['其他'],
     description: '打开菜单界面',
@@ -538,4 +550,5 @@ code {
   animation-delay: calc(var(--index, 0) * 0.05s);
   opacity: 0;
 }
+
 </style>
