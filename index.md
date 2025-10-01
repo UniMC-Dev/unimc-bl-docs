@@ -3,7 +3,7 @@
 layout: home
 
 hero:
-  name: "MCLUME "
+  name: "MCLUME"
   text: "WIKI"
   tagline: *POWERED BY UNIMC*
   image: 
