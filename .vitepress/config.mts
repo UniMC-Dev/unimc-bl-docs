@@ -34,7 +34,7 @@ export default defineConfig({
       })
     }
   },
-  title: "麦系WIKI",
+  title: "MCLUME WIKI",
   description: "WIKI",
   head: [["link", {rel:'icon',href:'/favico.png'}]],
   themeConfig: {
@@ -50,7 +50,7 @@ export default defineConfig({
           text: 'MCLUME',link: '/docs/mclume'
         },
         {
-text: 'MCBUCKET',link: '/docs/mcbucket'
+text: 'MCBUCKET',link: 'https://mcmbs.dpdns.org/'
         }
       ] },
       { text: '外链', items:[
