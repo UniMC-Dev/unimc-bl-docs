@@ -1,7 +1,5 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-<script setup>
-import { ref, computed, onMounted } from 'vue'
 const copyStatus = ref('') 
 const commands = ref([
 {
@@ -712,6 +710,7 @@ code {
   animation: fadeIn 0.5s ease-out forwards;
 }
 </style>
+
 
 
 
