@@ -52,18 +52,19 @@ body {
 }
 
 /* 内容容器增加半透明背景以确保可读性 */
-body .VPContent,
-body .vp-doc {
+.VPContent,
+.vp-doc {
   background-color: rgba(255, 255, 255, 0.85); /* 浅色背景带透明度 */
   backdrop-filter: blur(8px); /* 背景模糊增强可读性 */
   border-radius: 4px; /* 轻微圆角增强视觉效果 */
 }
 
 /* 深色模式适配 */
-body.dark .VPContent,
-body.dark .vp-doc {
+.dark .VPContent,
+.dark .vp-doc {
   background-color: rgba(15, 15, 25, 0.85); /* 深色背景带透明度 */
 }
+
 
 
 
