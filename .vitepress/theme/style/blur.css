@@ -42,31 +42,27 @@
     }
 
 }
-/* 在 var.css 末尾添加以下内容 */
-/* 非主页背景图片设置 */
-/* 通过 :not(.home) 排除主页 */
+/* 非主页背景图片设置（带透明度） */
 body:not(.home) {
-  /* 设置背景图片 */
+  position: relative;
+  /* 移除原有的background-image设置 */
+}
+
+/* 使用伪元素创建带透明度的背景层 */
+body:not(.home)::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-image: url('/background.png');
-  /* 背景图片固定不滚动 */
   background-attachment: fixed;
-  /* 背景图片覆盖整个页面 */
   background-size: cover;
-  /* 背景图片居中 */
-  background-position: center;
-  /* 背景图片不重复 */
+  background-position: center center;
   background-repeat: no-repeat;
-  /* 确保背景在内容下方 */
-  background-z-index: -10000;
-}
-
-/* 调整内容区域背景透明度以确保文字可读性 */
-body:not(.home) .vp-doc {
-  background-color: rgba(255, 255, 255, 0.85); /* 浅色模式 */
-}
-
-.dark body:not(.home) .vp-doc {
-  background-color: rgba(15, 15, 15, 0.85); /* 深色模式 */
+  opacity: 0.3; /* 透明度调整，0-1之间，值越小越透明 */
+  z-index: -1; /* 确保在内容下方 */
 }
 
 
