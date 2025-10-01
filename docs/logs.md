@@ -1,6 +1,6 @@
 <!-- 引入组件 -->
 <script setup>
-import Timeline from '/.vitepress/theme/components/Timeline.vue'
+import Timeline from './.vitepress/theme/components/Timeline.vue'
 
 // 时间线数据
 const timelineData = [
