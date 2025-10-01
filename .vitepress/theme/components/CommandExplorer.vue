@@ -314,7 +314,26 @@ onMounted(() => {
   margin: 2rem 0;
   font-family: var(--vp-font-family-base);
 }
+/* 添加复制提示样式 */
+.copy-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  background-color: var(--vp-c-brand-1);
+  color: white;
+  border-radius: 4px;
+  z-index: 9999;
+  animation: fadeInOut 2s ease-in-out;
+}
 
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translate(-50%, -20px); }
+  15% { opacity: 1; transform: translate(-50%, 0); }
+  85% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -20px); }
+}
 /* 搜索和筛选样式优化 */
 .command-filters {
   margin-bottom: 2rem;
@@ -693,5 +712,6 @@ code {
   animation: fadeIn 0.5s ease-out forwards;
 }
 </style>
+
 
 
