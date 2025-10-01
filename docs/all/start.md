@@ -4,7 +4,7 @@
 > 本文档将持续完善，欢迎提出宝贵意见！ 
 ## :clipboard:游玩须知
 >[!caution] 注意
->**进入本服务器即视为同意[EULA](/docs/mclume/eula)**
+>**进入本服务器即视为同意[EULA](/docs/mclume/eula)** | 
 >**请充分阅读[玩家守则](/docs/mclume/rules)**
 ::: tip
 服务器凌晨定时重启，保证流畅运行
@@ -36,5 +36,6 @@
  
 
 **৹ Yuluo**
+
 
 
