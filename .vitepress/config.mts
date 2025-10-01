@@ -118,21 +118,8 @@ text: 'UNIMC官网',link: 'https://www.unimc.homes'
       {
         text: 'MCBUCKET',
         collapsed: false,
-        items: [
-          { text: '关于', link: '/docs/mcbucket' },
-          {
-            text: '内容', collapsed: false, items:
-              [
-                {
-                  text: '菜单', link: '/docs/mcbucket/plugins/菜单'
-                },
-                {
-                  text: '经济', link: '/docs/mcbucket/plugins/经济'
-                },
-                {
-                  text: '区服', link: '/docs/mcbucket/plugins/区服'
-                }
-              ]
+        items: 
+          { text: '关于', link: '/docs/mcbucket' }
           }
         ]
       },
