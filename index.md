@@ -7,7 +7,7 @@ hero:
   text: "开放如一 体验至上"
   tagline: "POWERED BY UNIMC"
   image: 
-    src: /favico.png
+    src: /mlicon.png
     alt: logo
   actions:
     - theme: brand
