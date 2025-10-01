@@ -25,7 +25,7 @@ next:
  
 **至今累计运营五载**
 ## 须知事项:exclamation:
-- **请认真阅读 [常见问题](/docs/all/ask) 及 [游玩守则](/docs/all/rules.html#游玩守则)**
+- **请认真阅读 [常见问题](/docs/all/ask) 及 [游玩守则](/docs/mclume/rules)**
 - **关注群公告以获取最新内容**
 - **询问 群友/管理员 以获得帮助**
 ## 加入我们:iphone:
@@ -35,5 +35,6 @@ next:
 - **服务器 [官网](https://www.mcpool.net)**
  
 - **UNIMC [论坛](https://bbs.unimc.homes)**
+
 
 
