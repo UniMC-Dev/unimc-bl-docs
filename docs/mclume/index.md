@@ -1,7 +1,7 @@
 ---
 next:
-  text: '区服介绍'
-  link: '/docs/mclume/play/区服'
+  text: '最终协议'
+  link: '/docs/mclume/play/eula.md'
 ---
 # 欢迎来到 **MCLUME**:high_brightness:
 **:diamond_shape_with_a_dot_inside:体验至上 开放权限**
@@ -35,6 +35,7 @@ next:
 - **服务器 [官网](https://www.mcpool.net)**
  
 - **UNIMC [论坛](https://bbs.unimc.homes)**
+
 
 
 
