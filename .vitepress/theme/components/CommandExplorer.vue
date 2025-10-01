@@ -1,8 +1,10 @@
+//感谢老万！！！
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-const copyStatus = ref('') 
+import { ref, computed } from 'vue'
+
+// 指令数据
 const commands = ref([
-{
+  {
     name: '/tpa',
     categories: ['传送'],
     description: '请求传送到另一个玩家的位置',
@@ -166,34 +168,32 @@ const categories = computed(() => {
 // 搜索和筛选状态
 const searchQuery = ref('')
 const selectedCategory = ref('全部')
-const toast = useToast()
+// 复制提示状态
+const copyStatus = ref('')
 
-// 复制功能优化 - 添加视觉反馈
+// 复制功能（带提示）
 const copyToClipboard = (text, commandName) => {
   navigator.clipboard.writeText(text)
     .then(() => {
       copyStatus.value = `${commandName} 已复制`
-      // 2秒后清除提示
-      setTimeout(() => {
-        copyStatus.value = ''
-      }, 2000)
+      setTimeout(() => copyStatus.value = '', 2000) // 2秒后隐藏提示
     })
     .catch(err => {
       copyStatus.value = '复制失败'
       console.error('复制失败:', err)
-      setTimeout(() => {
-        copyStatus.value = ''
-      }, 2000)
+      setTimeout(() => copyStatus.value = '', 2000)
     })
 }
 
 // 筛选后的指令列表
 const filteredCommands = computed(() => {
   return commands.value.filter(cmd => {
+    // 分类筛选
     if (selectedCategory.value !== '全部' && !cmd.categories.includes(selectedCategory.value)) {
       return false
     }
     
+    // 搜索筛选
     if (searchQuery.value) {
       const query = searchQuery.value.toLowerCase()
       return cmd.name.toLowerCase().includes(query) || 
@@ -205,36 +205,24 @@ const filteredCommands = computed(() => {
   })
 })
 
-// 增加初始化动画
-onMounted(() => {
-  const cards = document.querySelectorAll('.command-card')
-  cards.forEach((card, index) => {
-    card.style.setProperty('--index', index)
-  })
-})
 </script>
 
 <template>
   <div class="command-explorer">
+    <!-- 复制提示 -->
+    <div v-if="copyStatus" class="copy-toast">{{ copyStatus }}</div>
+    
     <!-- 搜索和筛选区域 -->
     <div class="command-filters">
       <div class="search-box">
         <input 
           type="text" 
           v-model="searchQuery" 
-          placeholder="搜索指令或描述..." 
+          placeholder="搜索指令..." 
           class="search-input"
-          :class="{ focused: isSearchFocused }"
-          @focus="isSearchFocused = true"
-          @blur="isSearchFocused = false"
         />
         <div class="search-icon">🔍</div>
-        <!-- 搜索结果计数 -->
-        <div v-if="searchQuery" class="search-results-count">
-          找到 {{ filteredCommands.length }} 个结果
-        </div>
       </div>
-      
       <div class="category-filter">
         <span class="filter-label">分类:</span>
         <div class="category-buttons">
@@ -266,32 +254,29 @@ onMounted(() => {
       <div v-else class="command-grid">
         <div 
           v-for="(cmd, index) in filteredCommands" 
-          :key="cmd.name + cmd.usage + index" 
+          :key="cmd.name + cmd.usage" 
           class="command-card"
-          :style="{'--index': index}"
+          :style="{ '--index': index }"
         >
           <div class="command-header">
             <h3 class="command-name">{{ cmd.name }}</h3>
             <button 
               class="copy-btn" 
-              @click="copyToClipboard(cmd.name, $event)"
+              @click="copyToClipboard(cmd.name, cmd.name)"
               title="复制指令"
             >
               <span class="copy-icon">📋</span>
-              <span class="copy-success">✓</span>
             </button>
           </div>
-          
           <div class="command-categories">
             <span 
-              v-for="(category, catIndex) in cmd.categories" 
-              :key="catIndex" 
+              v-for="(category, index) in cmd.categories" 
+              :key="index" 
               class="command-category"
             >
               {{ category }}
             </span>
           </div>
-          
           <div class="command-body">
             <p class="command-description">{{ cmd.description }}</p>
             <div class="command-details">
@@ -311,8 +296,10 @@ onMounted(() => {
 .command-explorer {
   margin: 2rem 0;
   font-family: var(--vp-font-family-base);
+  position: relative; /* 为提示框定位 */
 }
-/* 添加复制提示样式 */
+
+/* 复制提示样式 */
 .copy-toast {
   position: fixed;
   top: 20px;
@@ -332,20 +319,16 @@ onMounted(() => {
   85% { opacity: 1; transform: translate(-50%, 0); }
   100% { opacity: 0; transform: translate(-50%, -20px); }
 }
-/* 搜索和筛选样式优化 */
+
+/* 搜索和筛选样式 */
 .command-filters {
   margin-bottom: 2rem;
   padding: 1.5rem;
   background-color: var(--vp-c-bg-soft);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(5px);
-  transition: all 0.3s ease;
-}
-
-.command-filters:hover {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
 }
 
 .search-box {
@@ -358,7 +341,7 @@ onMounted(() => {
   padding: 0.8rem 1rem 0.8rem 2.5rem;
   font-size: 1rem;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
+  border-radius: 6px;
   background-color: var(--vp-c-bg);
   color: var(--vp-c-text-1);
   transition: all 0.3s ease;
@@ -367,12 +350,7 @@ onMounted(() => {
 .search-input:focus {
   outline: none;
   border-color: var(--vp-c-brand-1);
-  box-shadow: 0 0 0 3px var(--vp-c-brand-soft);
-}
-
-.search-input.focused + .search-icon {
-  color: var(--vp-c-brand-1);
-  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 0 0 2px var(--vp-c-brand-soft);
 }
 
 .search-icon {
@@ -382,16 +360,6 @@ onMounted(() => {
   transform: translateY(-50%);
   color: var(--vp-c-text-2);
   pointer-events: none;
-  transition: all 0.2s ease;
-}
-
-.search-results-count {
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 0.85rem;
-  color: var(--vp-c-text-2);
 }
 
 .category-filter {
@@ -422,30 +390,11 @@ onMounted(() => {
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.category-btn::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.1);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.category-btn:hover::after {
-  opacity: 1;
 }
 
 .category-btn:hover {
   background-color: var(--vp-c-bg-mute);
   transform: translateY(-2px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .category-btn.active {
@@ -454,19 +403,16 @@ onMounted(() => {
   border-color: var(--vp-c-brand-1);
 }
 
-/* 指令卡片样式优化 */
+/* 指令卡片样式 */
 .command-results {
   margin-top: 1rem;
 }
 
 .no-results {
   text-align: center;
-  padding: 3rem 2rem;
+  padding: 2rem;
   color: var(--vp-c-text-2);
   font-style: italic;
-  background-color: var(--vp-c-bg-soft);
-  border-radius: 8px;
-  border: 1px dashed var(--vp-c-divider);
 }
 
 .command-grid {
@@ -477,20 +423,19 @@ onMounted(() => {
 
 .command-card {
   background-color: var(--vp-c-bg-soft);
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
   border: 1px solid var(--vp-c-divider);
   height: 100%;
   display: flex;
   flex-direction: column;
-  position: relative;
 }
 
 .command-card:hover {
-  transform: translateY(-8px) scale(1.01);
-  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   border-color: var(--vp-c-brand-1);
 }
 
@@ -501,59 +446,26 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.command-header::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.1) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  transform: translateX(-100%);
-  transition: transform 0.6s ease;
-}
-
-.command-card:hover .command-header::after {
-  transform: translateX(100%);
 }
 
 .command-name {
   margin: 0;
   font-size: 1.2rem;
   font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.command-name::before {
-  content: '/';
-  opacity: 0.8;
 }
 
 .copy-btn {
   background: rgba(255, 255, 255, 0.2);
   border: none;
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   color: white;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
+  transition: all 0.2s ease;
 }
 
 .copy-btn:hover {
@@ -561,49 +473,24 @@ onMounted(() => {
   transform: scale(1.1);
 }
 
-.copy-btn .copy-success {
-  position: absolute;
-  opacity: 0;
-  transform: scale(0.8);
-  transition: all 0.3s ease;
-}
-
-.copy-btn.copied .copy-icon {
-  opacity: 0;
-  transform: scale(0.8);
-}
-
-.copy-btn.copied .copy-success {
-  opacity: 1;
-  transform: scale(1);
-}
-
 .copy-icon {
   font-size: 16px;
-  transition: all 0.3s ease;
 }
 
 .command-categories {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1.5rem;
   background-color: var(--vp-c-bg-mute);
-  border-bottom: 1px solid var(--vp-c-divider);
 }
 
 .command-category {
   font-size: 0.8rem;
   background-color: var(--vp-c-brand-soft);
   color: var(--vp-c-brand-1);
-  padding: 0.25rem 0.75rem;
+  padding: 0.2rem 0.6rem;
   border-radius: 20px;
-  transition: all 0.2s ease;
-}
-
-.command-card:hover .command-category {
-  background-color: var(--vp-c-brand-1);
-  color: white;
 }
 
 .command-body {
@@ -617,8 +504,7 @@ onMounted(() => {
   margin-top: 0;
   margin-bottom: 1.2rem;
   color: var(--vp-c-text-1);
-  line-height: 1.6;
-  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 .command-details {
@@ -646,19 +532,14 @@ onMounted(() => {
 
 code {
   background-color: var(--vp-c-bg-mute);
-  padding: 0.3rem 0.5rem;
-  border-radius: 6px;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
   font-family: var(--vp-font-family-mono);
   font-size: 0.9rem;
   color: var(--vp-c-brand-1);
-  transition: all 0.2s ease;
 }
 
-.command-card:hover code {
-  background-color: var(--vp-c-brand-soft);
-}
-
-/* 响应式调整优化 */
+/* 响应式调整 */
 @media (max-width: 768px) {
   .command-grid {
     grid-template-columns: 1fr;
@@ -674,24 +555,14 @@ code {
     overflow-x: auto;
     padding-bottom: 0.5rem;
     flex-wrap: nowrap;
-    scrollbar-width: thin;
-  }
-  
-  .category-buttons::-webkit-scrollbar {
-    height: 4px;
-  }
-  
-  .category-buttons::-webkit-scrollbar-thumb {
-    background-color: var(--vp-c-divider);
-    border-radius: 2px;
   }
 }
 
-/* 动画效果增强 */
+/* 动画效果 */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(15px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -704,13 +575,4 @@ code {
   animation-delay: calc(var(--index, 0) * 0.05s);
   opacity: 0;
 }
-
-/* 空状态优化 */
-.no-results {
-  animation: fadeIn 0.5s ease-out forwards;
-}
 </style>
-
-
-
-
