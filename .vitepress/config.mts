@@ -119,9 +119,8 @@ text: 'UNIMC官网',link: 'https://www.unimc.homes'
       {
         text: 'MCBUCKET',
         collapsed: false,
-        items: 
+        items: [
           { text: '关于', link: '/docs/mcbucket' }
-          }
         ]
       },
       {
