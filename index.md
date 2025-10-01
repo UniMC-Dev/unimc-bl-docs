@@ -3,8 +3,8 @@
 layout: home
 
 hero:
-  name: "MCLUME"
-  text: "WIKI"
+  name: "MCLUME WIKI"
+  text: "开放如一 体验至上"
   tagline: "POWERED BY UNIMC"
   image: 
     src: /favico.png
