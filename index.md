@@ -5,7 +5,7 @@ layout: home
 hero:
   name: "MCLUME"
   text: "WIKI"
-  tagline: *POWERED BY UNIMC*
+  tagline: "POWERED BY UNIMC"
   image: 
     src: /favico.png
     alt: logo
