@@ -184,6 +184,7 @@ onMounted(() => {
 .timeline-details {
   margin: 0;
   padding-left: 1.5rem;
+  list-style: none; /* 新增：隐藏默认列表符号 */
 }
 
 .timeline-details li {
