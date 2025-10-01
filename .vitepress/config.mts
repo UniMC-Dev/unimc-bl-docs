@@ -72,7 +72,6 @@ text: 'UNIMC官网',link: 'https://www.unimc.homes'
         collapsed: false,
         items: [
           { text: '写在前面', link: '/docs/all/start' },
-          { text: '最终协议', link: '/docs/all/rules' },
           { text: '语音', link: '/docs/all/语音' },
           { text: '常见问题', link: '/docs/all/ask' }
         ]
@@ -82,6 +81,8 @@ text: 'UNIMC官网',link: 'https://www.unimc.homes'
         collapsed: false,
         items: [
           { text: '关于', link: '/docs/mclume' },
+          { text: '最终协议', link: '/docs/mclume/eula' },
+          { text: '玩家守则', link: '/docs/mclume/rules' },
           {
             text: '内容', collapsed: false, items:
               [
