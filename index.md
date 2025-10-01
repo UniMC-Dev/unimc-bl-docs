@@ -3,7 +3,7 @@
 layout: home
 
 hero:
-  name: "MCLUME X MCBUCKET"
+  name: "MCLUME *POWERED BY UNIMC*"
   text: "WIKI"
   tagline: 玩家为本 体验至上
   image: 
