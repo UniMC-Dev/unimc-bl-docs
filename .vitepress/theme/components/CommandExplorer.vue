@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useToast } from 'vitepress' // 引入vitepress的toast组件
+// 修正 useToast 的导入路径
+import { useToast } from 'vitepress/client'
 const commands = ref([
 {
     name: '/tpa',
@@ -689,3 +690,4 @@ code {
   animation: fadeIn 0.5s ease-out forwards;
 }
 </style>
+
