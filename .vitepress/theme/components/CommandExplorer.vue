@@ -1,7 +1,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-// 修正 useToast 的导入路径
-import { useToast } from 'vitepress/client'
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+const copyStatus = ref('') 
 const commands = ref([
 {
     name: '/tpa',
@@ -170,19 +171,21 @@ const selectedCategory = ref('全部')
 const toast = useToast()
 
 // 复制功能优化 - 添加视觉反馈
-const copyToClipboard = (text, event) => {
+const copyToClipboard = (text, commandName) => {
   navigator.clipboard.writeText(text)
     .then(() => {
-      // 显示复制成功提示
-      toast.success('指令已复制到剪贴板', { duration: 2000 })
-      // 按钮动画效果
-      const btn = event.currentTarget
-      btn.classList.add('copied')
-      setTimeout(() => btn.classList.remove('copied'), 1000)
+      copyStatus.value = `${commandName} 已复制`
+      // 2秒后清除提示
+      setTimeout(() => {
+        copyStatus.value = ''
+      }, 2000)
     })
     .catch(err => {
-      toast.error('复制失败，请手动复制', { duration: 2000 })
+      copyStatus.value = '复制失败'
       console.error('复制失败:', err)
+      setTimeout(() => {
+        copyStatus.value = ''
+      }, 2000)
     })
 }
 
@@ -690,4 +693,5 @@ code {
   animation: fadeIn 0.5s ease-out forwards;
 }
 </style>
+
 
