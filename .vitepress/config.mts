@@ -36,7 +36,7 @@ export default defineConfig({
   },
   title: "MCLUME WIKI",
   description: "WIKI",
-  head: [["link", {rel:'icon',href:'/favico.png'}]],
+  head: [["link", {rel:'icon',href:'/mlicon.png'}]],
   themeConfig: {
         search: { 
       provider: 'local'
