@@ -20,7 +20,7 @@
 :::
 <Linkcard url="/docs/mclume/play" title="MCLUME WIKI" description="快速跳转" logo="/mlicon.png"/>
  
-<Linkcard url="/docs/mclume/play" title="MCBUCKET WIKI" description="快速跳转" logo="/mbicon.png"/>
+<Linkcard url="https://mcmbs.dpdns.org/" title="MCBUCKET [SUPER] WIKI" description="快速跳转" logo="/mbicon.png"/>
 
 ## :family:管理团队
 **৹ 老八**
@@ -33,4 +33,5 @@
  
 **৹ Fire_Fly**
  
+
 **৹ Yuluo**
