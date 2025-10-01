@@ -1,10 +1,11 @@
-# MCLUME *POWERED BY UNIMC*:tada:
+# MCLUME | 麦熙:tada:
 **开放 尊重 始终如一**
 
 > 本文档将持续完善，欢迎提出宝贵意见！ 
 ## :clipboard:游玩须知
 >[!caution] 注意
->**请确保严格遵守[游玩守则](/docs/all/rules.html#游玩守则)**
+>**进入本服务器即视为同意[EULA](/docs/mclume/eula)**
+>**请充分阅读[玩家守则](/docs/mclume/rules)**
 ::: tip
 服务器凌晨定时重启，保证流畅运行
 :::
@@ -35,4 +36,5 @@
  
 
 **৹ Yuluo**
+
 
