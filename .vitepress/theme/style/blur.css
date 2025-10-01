@@ -40,31 +40,34 @@
         background-color: rgba(255, 255, 255, 0);
         backdrop-filter: blur(10px);
     }
-  --vp-background-image: url('/background.png');
 
 }
-body {
-  background-image: var(--vp-background-image);
-  background-size: cover; /* 覆盖整个页面 */
-  background-position: center; /* 居中显示 */
-  background-attachment: fixed; /* 固定背景不随滚动移动 */
-  background-repeat: no-repeat; /* 不重复平铺 */
+/* 在 var.css 末尾添加以下内容 */
+/* 非主页背景图片设置 */
+/* 通过 :not(.home) 排除主页 */
+body:not(.home) {
+  /* 设置背景图片 */
+  background-image: url('/background.png');
+  /* 背景图片固定不滚动 */
+  background-attachment: fixed;
+  /* 背景图片覆盖整个页面 */
+  background-size: cover;
+  /* 背景图片居中 */
+  background-position: center;
+  /* 背景图片不重复 */
+  background-repeat: no-repeat;
+  /* 确保背景在内容下方 */
+  background-z-index: -10000;
 }
 
-/* 内容容器增加半透明背景以确保可读性 */
-.VPContent,
-.vp-doc {
-  background-color: rgba(255, 255, 255, 0.85); /* 浅色背景带透明度 */
-  backdrop-filter: blur(8px); /* 背景模糊增强可读性 */
-  border-radius: 4px; /* 轻微圆角增强视觉效果 */
+/* 调整内容区域背景透明度以确保文字可读性 */
+body:not(.home) .vp-doc {
+  background-color: rgba(255, 255, 255, 0.85); /* 浅色模式 */
 }
 
-/* 深色模式适配 */
-.dark .VPContent,
-.dark .vp-doc {
-  background-color: rgba(15, 15, 25, 0.85); /* 深色背景带透明度 */
+.dark body:not(.home) .vp-doc {
+  background-color: rgba(15, 15, 15, 0.85); /* 深色模式 */
 }
-
 
 
 
