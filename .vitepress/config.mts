@@ -117,14 +117,13 @@ text: 'UNIMC官网',link: 'https://www.unimc.homes'
         ]
       },
       {
-        text: 'MCBUCKET',
-        collapsed: false,
-        items: [
-          { text: '关于', link: '/docs/mcbucket' }
-        ]
+        text: 'MCBUCKET', link: '/docs/mcbucket'
       },
       {
         text: '模组服', link: '/docs/mod'
+      },
+      {
+        text: '日志', link: '/docs/logs'
       }
     ],
 
