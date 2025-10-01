@@ -3,9 +3,9 @@
 layout: home
 
 hero:
-  name: "MCLUME *POWERED BY UNIMC*"
+  name: "MCLUME "
   text: "WIKI"
-  tagline: 玩家为本 体验至上
+  tagline: *POWERED BY UNIMC*
   image: 
     src: /favico.png
     alt: logo
