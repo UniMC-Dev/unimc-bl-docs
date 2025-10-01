@@ -41,7 +41,7 @@ export default defineConfig({
         search: { 
       provider: 'local'
     }, 
-    logo: "/favico.png",
+    logo: "/mlicon.png",
     nav: [
       { text: '主页', link: '/' },
       { text: '文档首页', link: '/docs/all/start' },
