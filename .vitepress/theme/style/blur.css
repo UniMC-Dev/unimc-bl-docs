@@ -43,7 +43,7 @@
   --vp-background-image: url('/background.png');
 
 }
-body:not(.VPHome) {
+body {
   background-image: var(--vp-background-image);
   background-size: cover; /* 覆盖整个页面 */
   background-position: center; /* 居中显示 */
@@ -52,22 +52,18 @@ body:not(.VPHome) {
 }
 
 /* 内容容器增加半透明背景以确保可读性 */
-body:not(.VPHome) .VPContent,
-body:not(.VPHome) .vp-doc {
+body .VPContent,
+body .vp-doc {
   background-color: rgba(255, 255, 255, 0.85); /* 浅色背景带透明度 */
   backdrop-filter: blur(8px); /* 背景模糊增强可读性 */
   border-radius: 4px; /* 轻微圆角增强视觉效果 */
 }
 
 /* 深色模式适配 */
-body:not(.VPHome).dark .VPContent,
-body:not(.VPHome).dark .vp-doc {
+body.dark .VPContent,
+body.dark .vp-doc {
   background-color: rgba(15, 15, 25, 0.85); /* 深色背景带透明度 */
 }
 
-/* 调整多边形背景透明度避免冲突 */
-#geo-canvas {
-  opacity: 0.5; /* 降低多边形背景透明度 */
-}
 
 
