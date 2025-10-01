@@ -104,7 +104,7 @@ onMounted(() => {
     const isDark = document.documentElement.classList.contains('dark');
     const baseColors = isDark
       ? [[0, 122, 204], [0, 80, 150], [22, 217, 199]]
-      : [[22, 217, 199], [0, 122, 204], [255, 199, 0]];
+      : [[0, 0, 79], [0, 122, 204], [255, 199, 0]];
     for (let y = 0; y < POINTS_Y; y++) {
       for (let x = 0; x < POINTS_X; x++) {
         const idx = y * (POINTS_X + 1) + x;
