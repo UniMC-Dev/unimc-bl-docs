@@ -1,3 +1,5 @@
+# LOG-日志
+*详情见Github*
 <!-- 引入组件 -->
 <script setup>
 import Timeline from '/vercel/path0/.vitepress/theme/components/Timeline.vue'
@@ -11,6 +13,7 @@ const timelineData = [
       '添加日志',
       '删改mb内容',
       '删改链接，重新调整布局'
+      '添加命令复制提示'
     ]
   }
 ]
