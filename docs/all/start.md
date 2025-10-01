@@ -1,10 +1,10 @@
-# MCLUME X MCBUCKET :tada:
+# MCLUME *POWERED BY UNIMC*:tada:
 **开放 尊重 始终如一**
+
 > 本文档将持续完善，欢迎提出宝贵意见！ 
 ## :clipboard:游玩须知
 >[!caution] 注意
->**两服共用一套基本守则，请确保严格遵守它**
->**[点击查看](./rules.md)。**
+>**请确保严格遵守[游玩守则](/docs/all/rules.html#游玩守则)**
 ::: tip
 服务器凌晨定时重启，保证流畅运行
 :::
@@ -35,3 +35,4 @@
  
 
 **৹ Yuluo**
+
