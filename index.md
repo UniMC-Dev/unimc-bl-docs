@@ -29,10 +29,10 @@ features:
     details: 5800X | 128GB 更流畅！
 ---
 <FloatingNotice 
-  title="公告" 
-  content="服务器。"
-  storageKey="update_notice_2025_10_2"
-  duration="0"
+  ftitle="公告" 
+  fcontent="服务器。"
+  fstorageKey="update_notice_2025_10_2"
+  fduration="0"
 />
 <!-- 美观低多边形动态背景 -->
 <div class="geo-background">
