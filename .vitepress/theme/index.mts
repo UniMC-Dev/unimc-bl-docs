@@ -18,7 +18,9 @@ export default {
     app.component('Linkcard', Linkcard);
     app.component('CommandExplorer', CommandExplorer);
     app.component('MyLayout', Mylayout);
+    app.component('FloatingNotice', FloatingNotice);
   }
 
 }
+
 
