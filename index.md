@@ -28,7 +28,7 @@ features:
     title: 性能
     details: 5800X | 128GB 更流畅！
 ---
-<announcement 
+<FloatingNotice 
   ftitle="公告" 
   fcontent="服务器。"
   fstorageKey="update_notice_2025_10_2"
