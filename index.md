@@ -31,7 +31,6 @@ features:
 <FloatingNotice 
   ftitle="公告" 
   fcontent="服务器。"
-  fstorageKey="update_notice_2025_10_2"
   fduration="0"
 />
 <!-- 美观低多边形动态背景 -->
