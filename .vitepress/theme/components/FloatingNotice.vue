@@ -1,8 +1,8 @@
 <template>
   <div 
-    v-if="visible" 
+    v-if="isVisible" 
     class="custom-toast"
-    :class="{ 'show': visible }"
+    :class="{ 'show': visible, 'hide': !visible }"
     @mousemove="handleMouseMove"
     @mouseleave="handleMouseLeave"
   >
@@ -45,7 +45,9 @@ const props = defineProps({
   }
 })
 
+// 用于控制动画完成后再隐藏元素
 const visible = ref(true)
+const isVisible = ref(true)
 const lightEffectStyle = reactive({
   opacity: 0,
   left: '0px',
@@ -55,6 +57,10 @@ const lightEffectStyle = reactive({
 
 const handleClose = () => {
   visible.value = false
+  // 等待关闭动画完成后再隐藏元素
+  setTimeout(() => {
+    isVisible.value = false
+  }, 400)
 }
 
 // 处理鼠标移动，实现光效跟随
@@ -79,32 +85,40 @@ const handleMouseLeave = () => {
 }
 
 onMounted(() => {
+  // 进入动画触发
+  setTimeout(() => {
+    visible.value = true
+  }, 10)
+  
   if (props.duration > 0) {
     setTimeout(() => {
-      visible.value = false
+      handleClose()
     }, props.duration)
   }
 })
 
 // 深色模式切换时强制重绘
 watch(isDark, () => {
-  if (visible.value) {
+  if (isVisible.value) {
     visible.value = false
-    setTimeout(() => visible.value = true, 50)
+    setTimeout(() => {
+      visible.value = true
+    }, 50)
   }
 })
 </script>
 
 <style scoped>
 .custom-toast {
-  min-height: 44px;
+  min-height: 48px;
   width: auto;
-  border-radius: 18px; /* 更圆润的边角，符合苹果风格 */
+  border-radius: 24px; /* 恢复初始圆角 */
   
-  /* 统一毛玻璃效果参数 */
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  /* 恢复初始毛玻璃效果 */
+  background: rgba(50, 50, 50, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   
   position: fixed;
   bottom: 2rem;
@@ -112,13 +126,13 @@ watch(isDark, () => {
   transform: translateX(-50%) translateY(100px);
   display: flex;
   align-items: center;
-  justify-content: center; /* 确保缩起时文字居中 */
+  justify-content: center; /* 缩起时文字居中 */
   gap: 0.5rem;
   padding: 0 16px;
   
-  color: #1d1d1f; /* 苹果风格文字颜色 */
+  color: #fff;
   font-size: 14px;
-  font-weight: 400; /* 苹果常用字重 */
+  font-weight: 500;
   overflow: hidden;
   
   opacity: 0;
@@ -127,28 +141,37 @@ watch(isDark, () => {
   z-index: 99999;
   pointer-events: auto;
   
-  /* 默认状态 - 只显示标题 */
-  max-width: auto;
+  /* 缩起时更短的长度 */
+  max-width: fit-content;
+  width: auto;
+  min-width: auto;
 }
 
-/* 显示状态动画 */
+/* 进入动画 */
 .custom-toast.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
 
+/* 关闭动画 */
+.custom-toast.hide {
+  opacity: 0;
+  transform: translateX(-50%) translateY(100px) scale(0.95);
+}
+
 /* 鼠标悬停时展开 */
 .custom-toast:hover {
-  padding: 0 18px;
+  padding: 0 20px;
   max-width: 90vw;
   gap: 0.75rem;
   justify-content: flex-start; /* 展开时内容左对齐 */
+  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .notice-title {
   margin: 0;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 0.35rem;
@@ -164,7 +187,7 @@ watch(isDark, () => {
   flex: 0;
   opacity: 0;
   width: 0; /* 初始宽度为0，避免布局跳动 */
-  transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 /* 鼠标悬停时显示文本 */
@@ -178,7 +201,7 @@ watch(isDark, () => {
 .notice-close {
   background: transparent;
   border: none;
-  color: rgba(60, 60, 60, 0.7);
+  color: rgba(255, 255, 255, 0.8);
   cursor: pointer;
   width: 24px;
   height: 24px;
@@ -189,8 +212,8 @@ watch(isDark, () => {
   padding: 0;
   pointer-events: auto;
   opacity: 0;
-  transform: scale(0.8); /* 只保留缩放，避免初始旋转导致错位 */
-  transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+  transform: scale(0.8);
+  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 /* 鼠标悬停时显示关闭按钮 */
@@ -200,12 +223,12 @@ watch(isDark, () => {
 }
 
 .notice-close:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  color: #1d1d1f;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
   transform: rotate(90deg);
 }
 
-/* 鼠标跟随光效 - 更柔和的苹果风格光效 */
+/* 鼠标跟随光效 */
 .light-effect {
   position: absolute;
   width: 200px;
@@ -222,27 +245,17 @@ watch(isDark, () => {
 @media (max-width: 768px) {
   .custom-toast {
     bottom: 1.5rem;
-    min-height: 40px;
+    min-height: 44px;
   }
 }
 </style>
 
 <!-- 深色模式样式 - 保持与日间相同的毛玻璃效果参数 -->
 <style>
-/* 深色模式适配 - 苹果风格深色模式 */
 html.dark .custom-toast {
-  background: rgba(28, 28, 30, 0.75) !important;
-  color: #f5f5f7 !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-}
-
-html.dark .notice-close {
-  color: rgba(200, 200, 200, 0.7) !important;
-}
-
-html.dark .notice-close:hover {
-  color: #f5f5f7 !important;
-  background-color: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(30, 30, 30, 0.9) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
 }
 
 html.dark .light-effect {
