@@ -1,7 +1,6 @@
 /* .vitepress/theme/style/custom-block.css */
 /* 深浅色卡 */
 :root {
-    --vp-c-bg: #ffffff00;
     --vp-home-hero-name-color: #14408e;
     --vp-button-brand-border: #14408e;
     --custom-block-info-left: #8ca0b3;
@@ -199,4 +198,5 @@
     left: -5px;
     top: -1px;
 }
+
 
