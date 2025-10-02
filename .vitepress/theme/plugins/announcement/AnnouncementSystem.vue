@@ -75,7 +75,7 @@ import { ref, computed, onMounted, onUnmounted, nextTick, h, watch } from 'vue'
 import { useRoute } from 'vitepress'
 import { announcements, globalConfig, type AnnouncementConfig } from './config'
 
-// 图标组件
+// 图标组件（保持不变）
 const InfoIcon = () => h('svg', {
   viewBox: '0 0 24 24',
   width: '20',
@@ -153,7 +153,7 @@ const getIconComponent = (type: string) => {
   return iconMap[type as keyof typeof iconMap] || InfoIcon
 }
 
-// 路径匹配辅助函数
+// 修复路径匹配逻辑 - 这是关键修复
 const isPathMatched = (currentPath: string, targetPath: string): boolean => {
   const normalizePath = (path: string) => {
     if (path === '/') return path
@@ -163,9 +163,9 @@ const isPathMatched = (currentPath: string, targetPath: string): boolean => {
   const normalizedCurrent = normalizePath(currentPath)
   const normalizedTarget = normalizePath(targetPath)
   
-  // 精确匹配首页
+  // 首页特殊处理
   if (normalizedTarget === '/') {
-    return normalizedCurrent === '/' || normalizedCurrent === '/index'
+    return normalizedCurrent === '/' || normalizedCurrent === '/index' || normalizedCurrent === ''
   }
   
   // 精确匹配
@@ -173,7 +173,7 @@ const isPathMatched = (currentPath: string, targetPath: string): boolean => {
     return true
   }
   
-  // 前缀匹配
+  // 前缀匹配（确保是完整的路径段）
   if (normalizedCurrent.startsWith(normalizedTarget + '/')) {
     return true
   }
@@ -200,6 +200,8 @@ const shouldShowAnnouncement = (announcement: AnnouncementConfig): boolean => {
   // 检查页面路径
   if (announcement.target && announcement.target.length > 0) {
     const currentPath = route.path
+    
+    // 关键修复：只要当前路径匹配任意一个目标路径，就应该显示
     const isMatched = announcement.target.some(targetPath => 
       isPathMatched(currentPath, targetPath)
     )
@@ -220,6 +222,7 @@ const shouldShowAnnouncement = (announcement: AnnouncementConfig): boolean => {
     return isMatched
   }
   
+  // 如果没有指定目标路径，默认在所有页面显示
   return true
 }
 
@@ -341,26 +344,34 @@ const handleKeydown = (event: KeyboardEvent) => {
   }
 }
 
-// 路由变化处理
+// 路由变化处理 - 修复计时器管理逻辑
 watch(() => route.path, (newPath, oldPath) => {
-  // 暂停离开页面的公告计时器
+  // 为所有可见公告设置正确的计时器状态
   visibleAnnouncements.value.forEach(announcement => {
-    const shouldShowOld = announcement.target?.some(target => 
-      isPathMatched(oldPath, target)
-    ) ?? true
+    const activeInfo = activeAnnouncements.value.get(announcement.id)
     
-    const shouldShowNew = announcement.target?.some(target => 
-      isPathMatched(newPath, target)
-    ) ?? true
-    
-    // 如果公告在旧页面显示但不在新页面显示，暂停计时器
-    if (shouldShowOld && !shouldShowNew) {
-      pauseAnnouncementTimer(announcement.id)
-    }
-    // 如果公告在新页面显示但不在旧页面显示，恢复计时器
-    else if (!shouldShowOld && shouldShowNew) {
+    if (!activeInfo) {
+      // 如果还没有状态，初始化
+      initAnnouncementState(announcement)
+      setupAutoClose(announcement)
+    } else if (activeInfo.timer === null && announcement.duration > 0) {
+      // 如果有状态但没有计时器，恢复计时器
       resumeAnnouncementTimer(announcement.id)
     }
+  })
+})
+
+// 监听可见公告的变化，确保新出现的公告正确初始化
+watch(visibleAnnouncements, (newVisible, oldVisible) => {
+  // 找出新出现的公告
+  const newAnnouncements = newVisible.filter(
+    ann => !oldVisible.some(oldAnn => oldAnn.id === ann.id)
+  )
+  
+  // 为新公告初始化状态和计时器
+  newAnnouncements.forEach(announcement => {
+    initAnnouncementState(announcement)
+    setupAutoClose(announcement)
   })
 })
 
