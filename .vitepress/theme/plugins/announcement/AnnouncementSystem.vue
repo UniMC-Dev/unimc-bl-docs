@@ -59,9 +59,9 @@
             
             <!-- 进度条 -->
             <div
-              v-if="announcement.duration > 0"
+              v-if="announcement.duration > 0 && announcement.showProgress"
               class="announcement-progress"
-              :style="{ animationDuration: `${announcement.duration}ms` }"
+              :style="{ animationDuration: `${announcement.remainingTime}ms` }"
             ></div>
           </div>
         </div>
@@ -71,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick, h } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, h, watch } from 'vue'
 import { useRoute } from 'vitepress'
 import { announcements, globalConfig, type AnnouncementConfig } from './config'
 
@@ -134,8 +134,13 @@ const CloseIcon = () => h('svg', {
 // 状态管理
 const route = useRoute()
 const closedAnnouncements = ref<Set<string>>(new Set())
-const closingAnnouncements = ref<Set<string>>(new Set()) // 正在关闭的公告
-const activeTimers = ref<Map<string, number>>(new Map())
+const closingAnnouncements = ref<Set<string>>(new Set())
+const activeAnnouncements = ref<Map<string, {
+  startTime: number
+  remainingTime: number
+  showProgress: boolean
+  timer: number | null
+}>>(new Map())
 
 // 获取图标组件
 const getIconComponent = (type: string) => {
@@ -150,7 +155,6 @@ const getIconComponent = (type: string) => {
 
 // 路径匹配辅助函数
 const isPathMatched = (currentPath: string, targetPath: string): boolean => {
-  // 规范化路径（移除尾部斜杠，除非是根路径）
   const normalizePath = (path: string) => {
     if (path === '/') return path
     return path.endsWith('/') ? path.slice(0, -1) : path
@@ -169,7 +173,7 @@ const isPathMatched = (currentPath: string, targetPath: string): boolean => {
     return true
   }
   
-  // 前缀匹配（确保是完整的路径段）
+  // 前缀匹配
   if (normalizedCurrent.startsWith(normalizedTarget + '/')) {
     return true
   }
@@ -179,7 +183,7 @@ const isPathMatched = (currentPath: string, targetPath: string): boolean => {
 
 // 检查公告是否应该显示
 const shouldShowAnnouncement = (announcement: AnnouncementConfig): boolean => {
-  // 检查是否已关闭（但不包括正在关闭的，让它们有时间播放动画）
+  // 检查是否已关闭
   if (closedAnnouncements.value.has(announcement.id)) {
     return false
   }
@@ -200,12 +204,12 @@ const shouldShowAnnouncement = (announcement: AnnouncementConfig): boolean => {
       isPathMatched(currentPath, targetPath)
     )
     
-    // 调试信息（开发环境）
+    // 调试信息
     if (process.env.NODE_ENV === 'development') {
       console.log(`🔍 公告路径匹配调试 [${announcement.id}]:`, {
-        currentPath: currentPath,
+        currentPath,
         targetPaths: announcement.target,
-        isMatched: isMatched,
+        isMatched,
         matchDetails: announcement.target.map(target => ({
           target,
           matched: isPathMatched(currentPath, target)
@@ -219,54 +223,117 @@ const shouldShowAnnouncement = (announcement: AnnouncementConfig): boolean => {
   return true
 }
 
-// 计算可见的公告
+// 计算可见的公告（包含状态信息）
 const visibleAnnouncements = computed(() => {
-  return announcements
+  const nowVisible = announcements
     .filter(shouldShowAnnouncement)
     .sort((a, b) => b.priority - a.priority)
     .slice(0, globalConfig.maxVisible)
+    .map(announcement => {
+      const activeInfo = activeAnnouncements.value.get(announcement.id)
+      return {
+        ...announcement,
+        showProgress: activeInfo?.showProgress ?? (announcement.duration > 0),
+        remainingTime: activeInfo?.remainingTime ?? announcement.duration
+      }
+    })
+
+  return nowVisible
 })
 
-// 关闭公告
-const closeAnnouncement = (id: string) => {
-  // 标记为正在关闭，开始播放离开动画
-  closingAnnouncements.value.add(id)
-  
-  // 清除定时器
-  const timer = activeTimers.value.get(id)
-  if (timer) {
-    clearTimeout(timer)
-    activeTimers.value.delete(id)
+// 初始化或恢复公告状态
+const initAnnouncementState = (announcement: AnnouncementConfig) => {
+  if (!activeAnnouncements.value.has(announcement.id)) {
+    activeAnnouncements.value.set(announcement.id, {
+      startTime: Date.now(),
+      remainingTime: announcement.duration,
+      showProgress: announcement.duration > 0,
+      timer: null
+    })
   }
-  
-  // 延迟添加到已关闭列表，给动画时间播放
-  setTimeout(() => {
-    closedAnnouncements.value.add(id)
-    closingAnnouncements.value.delete(id)
-  }, 300) // 与 CSS 动画时长保持一致
-}
-
-// 处理公告点击
-const handleAnnouncementClick = (announcement: AnnouncementConfig) => {
-  // 可以在这里添加点击事件处理逻辑
-  console.log('Announcement clicked:', announcement.id)
 }
 
 // 设置自动关闭定时器
 const setupAutoClose = (announcement: AnnouncementConfig) => {
-  if (announcement.duration > 0) {
-    const timer = setTimeout(() => {
-      closeAnnouncement(announcement.id)
-    }, announcement.duration)
-    
-    activeTimers.value.set(announcement.id, timer)
+  const activeInfo = activeAnnouncements.value.get(announcement.id)
+  if (!activeInfo || announcement.duration <= 0) return
+
+  // 清除现有定时器
+  if (activeInfo.timer) {
+    clearTimeout(activeInfo.timer)
   }
+
+  // 设置新定时器
+  activeInfo.timer = setTimeout(() => {
+    closeAnnouncement(announcement.id)
+  }, activeInfo.remainingTime) as unknown as number
+
+  activeAnnouncements.value.set(announcement.id, activeInfo)
+}
+
+// 暂停公告计时器
+const pauseAnnouncementTimer = (announcementId: string) => {
+  const activeInfo = activeAnnouncements.value.get(announcementId)
+  if (!activeInfo || !activeInfo.timer) return
+
+  // 计算剩余时间
+  const elapsed = Date.now() - activeInfo.startTime
+  activeInfo.remainingTime = Math.max(0, activeInfo.remainingTime - elapsed)
+  
+  // 清除定时器
+  clearTimeout(activeInfo.timer)
+  activeInfo.timer = null
+  activeInfo.showProgress = false
+
+  activeAnnouncements.value.set(announcementId, activeInfo)
+}
+
+// 恢复公告计时器
+const resumeAnnouncementTimer = (announcementId: string) => {
+  const announcement = announcements.find(a => a.id === announcementId)
+  const activeInfo = activeAnnouncements.value.get(announcementId)
+  
+  if (!announcement || !activeInfo || announcement.duration <= 0) return
+
+  // 重置开始时间
+  activeInfo.startTime = Date.now()
+  activeInfo.showProgress = true
+
+  // 设置定时器
+  activeInfo.timer = setTimeout(() => {
+    closeAnnouncement(announcementId)
+  }, activeInfo.remainingTime) as unknown as number
+
+  activeAnnouncements.value.set(announcementId, activeInfo)
+}
+
+// 关闭公告
+const closeAnnouncement = (id: string) => {
+  // 标记为正在关闭
+  closingAnnouncements.value.add(id)
+  
+  // 清除定时器
+  const activeInfo = activeAnnouncements.value.get(id)
+  if (activeInfo?.timer) {
+    clearTimeout(activeInfo.timer)
+  }
+  activeAnnouncements.value.delete(id)
+  
+  // 延迟添加到已关闭列表
+  setTimeout(() => {
+    closedAnnouncements.value.add(id)
+    closingAnnouncements.value.delete(id)
+  }, 300)
+}
+
+// 处理公告点击
+const handleAnnouncementClick = (announcement: AnnouncementConfig) => {
+  console.log('Announcement clicked:', announcement.id)
 }
 
 // 键盘事件处理
 const handleKeydown = (event: KeyboardEvent) => {
   if (globalConfig.enableKeyboard && event.key === 'Escape') {
-    // ESC 键关闭最新的公告
     const latestAnnouncement = visibleAnnouncements.value[0]
     if (latestAnnouncement && latestAnnouncement.closable) {
       closeAnnouncement(latestAnnouncement.id)
@@ -274,13 +341,39 @@ const handleKeydown = (event: KeyboardEvent) => {
   }
 }
 
+// 路由变化处理
+watch(() => route.path, (newPath, oldPath) => {
+  // 暂停离开页面的公告计时器
+  visibleAnnouncements.value.forEach(announcement => {
+    const shouldShowOld = announcement.target?.some(target => 
+      isPathMatched(oldPath, target)
+    ) ?? true
+    
+    const shouldShowNew = announcement.target?.some(target => 
+      isPathMatched(newPath, target)
+    ) ?? true
+    
+    // 如果公告在旧页面显示但不在新页面显示，暂停计时器
+    if (shouldShowOld && !shouldShowNew) {
+      pauseAnnouncementTimer(announcement.id)
+    }
+    // 如果公告在新页面显示但不在旧页面显示，恢复计时器
+    else if (!shouldShowOld && shouldShowNew) {
+      resumeAnnouncementTimer(announcement.id)
+    }
+  })
+})
+
 // 生命周期
 onMounted(async () => {
   // 延迟显示公告
   await new Promise(resolve => setTimeout(resolve, globalConfig.showDelay))
   
-  // 为每个可见公告设置自动关闭
-  visibleAnnouncements.value.forEach(setupAutoClose)
+  // 初始化可见公告的状态
+  visibleAnnouncements.value.forEach(announcement => {
+    initAnnouncementState(announcement)
+    setupAutoClose(announcement)
+  })
   
   // 添加键盘事件监听
   if (globalConfig.enableKeyboard) {
@@ -290,8 +383,12 @@ onMounted(async () => {
 
 onUnmounted(() => {
   // 清除所有定时器
-  activeTimers.value.forEach(timer => clearTimeout(timer))
-  activeTimers.value.clear()
+  activeAnnouncements.value.forEach(activeInfo => {
+    if (activeInfo.timer) {
+      clearTimeout(activeInfo.timer)
+    }
+  })
+  activeAnnouncements.value.clear()
   
   // 清理状态
   closingAnnouncements.value.clear()
@@ -304,6 +401,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* 样式保持不变 */
 .announcement-system {
   position: fixed;
   left: 50%;
