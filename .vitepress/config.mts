@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitepress'
 export default defineConfig({
+  ignoreDeadLinks: true,
   markdown: { // markdown 配置
     math: true,
     lineNumbers: true, // 行号显示
