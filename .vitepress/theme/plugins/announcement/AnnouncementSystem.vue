@@ -334,6 +334,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* --- 顶部布局 (保持不变) --- */
 .announcement-system {
   position: fixed;
   left: 50%;
@@ -356,7 +357,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative;
+  position: relative; 
 }
 
 .announcement-wrapper {
@@ -364,47 +365,87 @@ onUnmounted(() => {
   pointer-events: auto;
 }
 
+/* --- 液态玻璃/亚克力效果 (新增微模糊) --- */
 .announcement-toast {
   position: relative;
   width: 100%;
-  border-radius: 16px;
+  border-radius: 24px; 
   overflow: hidden;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  /* 【核心修改】：重新添加微弱的高斯模糊，提高可读性 */
+  backdrop-filter: blur(2px); 
+  -webkit-backdrop-filter: blur(2px);
+  
+  /* 浮动阴影 + 边缘高光 */
   box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    0 2px 8px rgba(0, 0, 0, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 20px 50px rgba(0, 0, 0, 0.2), 
+    0 8px 20px rgba(0, 0, 0, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3), 
+    inset 0 1px 0 rgba(255, 255, 255, 0.25); 
 }
 
 .announcement-toast:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px) scale(1.01); 
   box-shadow: 
-    0 12px 40px rgba(0, 0, 0, 0.15),
-    0 4px 12px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    0 25px 70px rgba(0, 0, 0, 0.25), 
+    0 10px 25px rgba(0, 0, 0, 0.15),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3); 
 }
 
 .announcement-toast.closing {
   opacity: 0;
-  transform: translateY(-10px) scale(0.98);
+  transform: translateY(-10px) scale(0.95);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.6, 1);
 }
 
+/* --- 边缘反射光带 (保持不变) --- */
+.announcement-toast::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  pointer-events: none;
+  z-index: 2; 
+  border-radius: 24px 24px 0 0;
+  
+  background: linear-gradient(
+    to right, 
+    rgba(255, 255, 255, 0) 0%, 
+    rgba(255, 255, 255, 0.7) 50%, 
+    rgba(255, 255, 255, 0) 100%
+  );
+  opacity: 0.9;
+  
+  .dark & {
+    opacity: 0.6;
+    background: linear-gradient(
+      to right, 
+      rgba(255, 255, 255, 0) 0%, 
+      rgba(255, 255, 255, 0.4) 50%, 
+      rgba(255, 255, 255, 0) 100%
+    );
+  }
+}
+
+/* --- 透明背景层 (保持高透明度) --- */
 .announcement-backdrop {
   position: absolute;
   inset: 0;
   background: var(--vp-c-bg-soft);
-  opacity: 0.9;
+  opacity: 0.2; /* 亮色模式高透明度 */
+  border-radius: 24px;
 }
 
 .dark .announcement-backdrop {
-  background: rgba(30, 30, 30, 0.9);
+  background: rgba(18, 18, 18, 0.3); /* 暗色模式高透明度 */
 }
 
+/* --- 内容和排版 (保持不变) --- */
 .announcement-content {
   position: relative;
   display: flex;
@@ -420,7 +461,6 @@ onUnmounted(() => {
   margin-top: 2px;
   color: var(--announcement-color);
 }
-
 .announcement-text {
   flex: 1;
   min-width: 0;
@@ -452,6 +492,7 @@ onUnmounted(() => {
   border-radius: 8px;
   transition: all 0.2s ease;
   margin-top: -2px;
+  z-index: 10;
 }
 
 .announcement-close:hover {
@@ -473,7 +514,8 @@ onUnmounted(() => {
   width: 100%;
   transform-origin: left;
   animation: progress linear forwards;
-  opacity: 0.6;
+  opacity: 0.8;
+  z-index: 1;
 }
 
 @keyframes progress {
@@ -485,7 +527,7 @@ onUnmounted(() => {
   }
 }
 
-/* 类型样式 */
+/* 类型样式 (保持不变) */
 .type-info {
   --announcement-color: #007AFF;
 }
@@ -502,7 +544,7 @@ onUnmounted(() => {
   --announcement-color: #FF3B30;
 }
 
-/* 公告系统淡入动画 */
+/* --- 动画修复和增强 (保持不变) --- */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.5s ease;
@@ -513,7 +555,6 @@ onUnmounted(() => {
   opacity: 0;
 }
 
-/* 公告项动画 */
 .announcement-enter-active {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   transition-delay: var(--delay, 0ms);
@@ -521,8 +562,7 @@ onUnmounted(() => {
 
 .announcement-leave-active {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.6, 1);
-    position: absolute; 
-  /* 确保元素在脱离文档流后仍能占据全部宽度 */
+  position: absolute; 
   width: 100%; 
 }
 
@@ -540,7 +580,7 @@ onUnmounted(() => {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 响应式设计 */
+/* --- 响应式设计 (保持不变) --- */
 @media (max-width: 768px) {
   .announcement-system {
     padding: 0 16px;
@@ -560,7 +600,6 @@ onUnmounted(() => {
   }
 }
 
-/* 减少动画偏好设置 */
 @media (prefers-reduced-motion: reduce) {
   .announcement-toast,
   .announcement-toast.closing,
@@ -579,7 +618,6 @@ onUnmounted(() => {
   }
 }
 
-/* 高对比度模式 */
 @media (prefers-contrast: high) {
   .announcement-toast {
     border: 2px solid var(--announcement-color);
