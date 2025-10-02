@@ -5,9 +5,9 @@
     class="floating-notice"
     :class="{ 'notice-hidden': !visible }"
   >
-    <div class="notice-content">
-      <h3 class="notice-title">📢 {{ title }}</h3>
-      <p class="notice-text">{{ content }}</p>
+    <div class="notice-fcontent">
+      <h3 class="notice-ftitle">📢 {{ title }}</h3>
+      <p class="notice-ftext">{{ content }}</p>
       <button 
         class="notice-close" 
         @click="handleClose"
@@ -25,19 +25,19 @@ import { useStorage } from '@vueuse/core'
 
 // 组件属性定义
 const props = defineProps({
-  title: {
+  ftitle: {
     type: String,
     default: '最新公告'
   },
-  content: {
+  fcontent: {
     type: String,
     required: true
   },
-  storageKey: {
+  fstorageKey: {
     type: String,
     default: 'floating_notice_closed'
   },
-  duration: {
+  fduration: {
     type: Number,
     default: 0 // 0表示不自动关闭
   }
@@ -79,7 +79,7 @@ onMounted(() => {
   animation: floatIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.notice-content {
+.notice-fcontent {
   background-color: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(10px);
   border: 1px solid var(--vp-c-divider);
@@ -90,12 +90,12 @@ onMounted(() => {
   transition: all 0.3s ease;
 }
 
-.notice-content:hover {
+.notice-fcontent:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
 }
 
-.notice-title {
+.notice-ftitle {
   margin: 0 0 0.75rem 0;
   color: var(--vp-c-brand-1);
   font-size: 1.2rem;
@@ -104,7 +104,7 @@ onMounted(() => {
   gap: 0.5rem;
 }
 
-.notice-text {
+.notice-ftext {
   margin: 0;
   color: var(--vp-c-text-1);
   line-height: 1.6;
@@ -158,11 +158,11 @@ onMounted(() => {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .notice-content {
+  .notice-fcontent {
     padding: 1.25rem;
   }
   
-  .notice-title {
+  .notice-ftitle {
     font-size: 1.1rem;
   }
 }
