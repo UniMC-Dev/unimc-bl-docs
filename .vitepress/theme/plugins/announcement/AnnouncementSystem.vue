@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <Transition name="fade">
-      <div 
+      <div
         v-if="showAnnouncementSystem && visibleAnnouncements.length > 0"
         class="announcement-system"
         :class="`position-${globalConfig.position || 'top'}`"
@@ -17,7 +17,7 @@
             v-for="(announcement, index) in visibleAnnouncements"
             :key="announcement.id"
             class="announcement-wrapper"
-            :style="{ '--delay': `${index * 100}ms` }"
+            :style="{ '--delay': `${index * 80}ms` }"
           >
             <div
               class="announcement-toast"
@@ -28,12 +28,17 @@
                 { 'closing': closingAnnouncements.has(announcement.id) }
               ]"
               @click="handleAnnouncementClick(announcement)"
+              @mouseenter="pauseTimer(announcement.id)" 
+              @mouseleave="resumeTimer(announcement.id)"
             >
               <div class="announcement-backdrop"></div>
               
               <div class="announcement-content">
-                <div v-if="announcement.showIcon" class="announcement-icon">
-                  <component :is="getIconComponent(announcement.type)" />
+                <div v-if="announcement.showIcon" class="announcement-icon-container">
+                  <component 
+                    :is="getIconComponent(announcement.type)" 
+                    class="announcement-icon"
+                  />
                 </div>
                 
                 <div class="announcement-text">
@@ -49,14 +54,16 @@
                   @click.stop="closeAnnouncement(announcement.id)"
                   :aria-label="'关闭公告'"
                 >
-                  <CloseIcon />
+                  <CloseIcon class="close-icon" />
                 </button>
               </div>
               
               <div
                 v-if="announcement.duration > 0 && announcement.showProgress"
                 class="announcement-progress"
-                :style="{ animationDuration: `${announcement.remainingTime}ms` }"
+                :style="{ 
+                    transform: `scaleX(${announcement.remainingTime / announcement.duration})`
+                }"
               ></div>
             </div>
           </div>
@@ -67,75 +74,112 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick, h, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, h, watch } from 'vue'
 import { useRoute } from 'vitepress'
-import { announcements, globalConfig, type AnnouncementConfig } from './config'
+// 假设 config 文件如下，你需要确保它们能被正确导入
+import { announcements, globalConfig, type AnnouncementConfig } from './config' 
 
-// --- 图标组件定义 (保持不变) ---
+// --- 图标组件定义（保持不变）---
 const InfoIcon = () => h('svg', {
   viewBox: '0 0 24 24',
   width: '20',
   height: '20',
-  fill: 'currentColor'}, [
+  fill: 'currentColor',
+  class: 'icon-svg'
+}, [
   h('path', {
     d: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'
-  })])
+  })
+])
+
 const SuccessIcon = () => h('svg', {
   viewBox: '0 0 24 24',
   width: '20',
   height: '20',
-  fill: 'currentColor'}, [
+  fill: 'currentColor',
+  class: 'icon-svg'
+}, [
   h('path', {
-    d: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'
-  })])
+    d: 'M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'
+  })
+])
+
 const WarningIcon = () => h('svg', {
   viewBox: '0 0 24 24',
   width: '20',
   height: '20',
-  fill: 'currentColor'}, [
+  fill: 'currentColor',
+  class: 'icon-svg'
+}, [
   h('path', {
     d: 'M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z'
-  })])
+  })
+])
+
 const ErrorIcon = () => h('svg', {
   viewBox: '0 0 24 24',
   width: '20',
   height: '20',
-  fill: 'currentColor'}, [
+  fill: 'currentColor',
+  class: 'icon-svg'
+}, [
   h('path', {
     d: 'M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z'
-  })])
+  })
+])
+
 const CloseIcon = () => h('svg', {
   viewBox: '0 0 24 24',
   width: '16',
   height: '16',
-  fill: 'currentColor'}, [
+  fill: 'currentColor',
+  class: 'icon-svg'
+}, [
   h('path', {
     d: 'M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'
-  })])
-// --- 状态管理 ---
+  })
+])
+
+// --- 状态管理和工具函数 ---
 const route = useRoute()
 const showAnnouncementSystem = ref(false) 
-const closedAnnouncements = ref<Set<string>>(new Set()) // 永久关闭/已结束的公告
-const closingAnnouncements = ref<Set<string>>(new Set()) // 正在执行关闭动画的公告
-const activeAnnouncements = ref<Map<string, {
-  startTime: number
-  remainingTime: number
-  showProgress: boolean
-  timer: number | null
-  isActive: boolean // 关键：表示公告当前是否处于生命周期中
-}>>(new Map()) 
+const closedAnnouncements = ref<Set<string>>(new Set())
+const closingAnnouncements = ref<Set<string>>(new Set())
 
-// --- 工具函数 (保持不变) ---
+interface ActiveAnnouncementState {
+  rAFHandle: number | null // requestAnimationFrame 句柄
+  
+  remainingTime: number // 当前剩余时间（毫秒），用于渲染进度
+  duration: number // 原始总时长（毫秒）
+  
+  // startCountingTime: number // 不再需要，用 lastFrameTime 替代
+  lastFrameTime: number; // 新增：上次 rAF 成功更新进度的时间戳
+  
+  showProgress: boolean
+  isActive: boolean
+  isPaused: boolean 
+}
+
+const activeAnnouncements = ref<Map<string, ActiveAnnouncementState>>(new Map()) 
+
 const getIconComponent = (type: string) => {
   const iconMap = { info: InfoIcon, success: SuccessIcon, warning: WarningIcon, error: ErrorIcon }
   return iconMap[type as keyof typeof iconMap] || InfoIcon
 }
 
-const isPathMatched = (currentPath: string, targetPath: string): boolean => {
-  const normalizePath = (path: string) => {
+// 路径匹配逻辑（保持不变）
+const normalizePath = (path: string): string => {
+  try {
+    const decodedPath = decodeURIComponent(path)
+    if (decodedPath === '/') return decodedPath
+    return decodedPath.endsWith('/') ? decodedPath.slice(0, -1) : decodedPath
+  } catch (e) {
     if (path === '/') return path
     return path.endsWith('/') ? path.slice(0, -1) : path
   }
+}
+
+const isPathMatched = (currentPath: string, targetPath: string): boolean => {
   const normalizedCurrent = normalizePath(currentPath)
   const normalizedTarget = normalizePath(targetPath)
   
@@ -151,28 +195,14 @@ const isPathMatched = (currentPath: string, targetPath: string): boolean => {
   return false
 }
 
-// 检查公告是否“有资格”在当前路由下“首次”显示
 const canBeActivated = (announcement: AnnouncementConfig): boolean => {
-  // 1. 检查是否已关闭/已结束
-  if (closedAnnouncements.value.has(announcement.id)) {
-    return false
-  }
-  
-  // 2. 检查是否已经处于活跃状态（如果已活跃，则返回 false，防止重复激活）
-  if (activeAnnouncements.value.get(announcement.id)?.isActive) {
-      return false
-  }
+  if (closedAnnouncements.value.has(announcement.id)) return false
+  if (activeAnnouncements.value.get(announcement.id)?.isActive) return false
 
-  // 3. 检查时间范围
   const now = new Date()
-  if (announcement.startTime && new Date(announcement.startTime) > now) {
-    return false
-  }
-  if (announcement.endTime && new Date(announcement.endTime) < now) {
-    return false
-  }
+  if (announcement.startTime && new Date(announcement.startTime) > now) return false
+  if (announcement.endTime && new Date(announcement.endTime) < now) return false
   
-  // 4. 检查页面路径
   if (announcement.target && announcement.target.length > 0) {
     const currentPath = route.path
     return announcement.target.some(targetPath => isPathMatched(currentPath, targetPath))
@@ -181,78 +211,127 @@ const canBeActivated = (announcement: AnnouncementConfig): boolean => {
   return true
 }
 
-// 初始化/激活公告状态
 const initAnnouncementState = (announcement: AnnouncementConfig) => {
-  // 仅在未激活状态下才初始化
   if (!activeAnnouncements.value.get(announcement.id)?.isActive) {
     activeAnnouncements.value.set(announcement.id, {
-      startTime: Date.now(),
-      remainingTime: announcement.duration,
+      rAFHandle: null,
+      remainingTime: announcement.duration, 
+      duration: announcement.duration,
+      lastFrameTime: 0, // 初始化为 0
       showProgress: announcement.duration > 0,
-      timer: null,
-      isActive: true // 标记为已激活
+      isActive: true,
+      isPaused: false,
     })
   }
 }
 
-// 设置自动关闭定时器
-const setupAutoClose = (announcement: AnnouncementConfig) => {
-  const activeInfo = activeAnnouncements.value.get(announcement.id)
-  // 如果没有活跃信息，或者没有设置时长，或者定时器已存在，则退出
-  if (!activeInfo || announcement.duration <= 0 || activeInfo.timer) return
+// **rAF 计时核心 (优化)**
+const startRAFTimer = (id: string) => {
+  const state = activeAnnouncements.value.get(id)
+  if (!state || state.isPaused || state.rAFHandle || state.duration <= 0) return
 
-  // 设置新定时器
-  activeInfo.timer = setTimeout(() => {
-    // 自动关闭时调用 closeAnnouncement
-    closeAnnouncement(announcement.id)
-  }, activeInfo.remainingTime) as unknown as number
+  const step = (timestamp: number) => {
+    // 检查是否已暂停或被关闭
+    if (state.isPaused || !activeAnnouncements.value.get(id)) {
+      if (state.rAFHandle) cancelAnimationFrame(state.rAFHandle)
+      state.rAFHandle = null
+      return
+    }
+    
+    // 关键优化：计算本次与上次渲染之间流逝的精确时间
+    // 第一次运行 (lastFrameTime=0) 时，deltaTime 应该为 0，因为时间是从本次 rAF 帧开始算的
+    const deltaTime = state.lastFrameTime ? (timestamp - state.lastFrameTime) : 0; 
 
-  activeAnnouncements.value.set(announcement.id, activeInfo)
+    let newRemaining = state.remainingTime - deltaTime;
+
+    if (newRemaining <= 0) {
+      newRemaining = 0
+      state.remainingTime = newRemaining
+      closeAnnouncement(id)
+      if (state.rAFHandle) cancelAnimationFrame(state.rAFHandle)
+      state.rAFHandle = null
+      return
+    }
+
+    state.remainingTime = newRemaining
+    state.lastFrameTime = timestamp; // 更新上次渲染时间戳
+    
+    // 自动触发 Vue 重新渲染 progress 元素的 transform 样式
+    state.rAFHandle = requestAnimationFrame(step)
+  }
+
+  // 恢复/启动时，重置 lastFrameTime 以确保 rAF 的第一次计算 deltaTime 为 0
+  state.lastFrameTime = 0; 
+  state.rAFHandle = requestAnimationFrame(step)
+  activeAnnouncements.value.set(id, state)
 }
 
-// **【核心 computed 属性】** 计算可见的公告
-const visibleAnnouncements = computed(() => {
-    // 仅显示所有当前处于“isActive: true”的公告，**忽略当前路由的路径匹配**。
-    const activeAnnouncementsList = announcements
-        .filter(announcement => activeAnnouncements.value.get(announcement.id)?.isActive)
-        .map(announcement => {
-            const activeInfo = activeAnnouncements.value.get(announcement.id)!
-            return {
-                ...announcement,
-                showProgress: activeInfo.showProgress,
-                remainingTime: activeInfo.remainingTime
-            }
-        })
-        .sort((a, b) => b.priority - a.priority)
-        .slice(0, globalConfig.maxVisible)
+// **暂停计时器 (简化)**
+const pauseTimer = (id: string) => {
+  const state = activeAnnouncements.value.get(id)
+  if (!state || !state.showProgress || state.isPaused) return
 
-    return activeAnnouncementsList
+  // 1. 停止 rAF 循环
+  if (state.rAFHandle) cancelAnimationFrame(state.rAFHandle)
+  state.rAFHandle = null
+  
+  // 2. 标记暂停 (remainingTime 在 rAF 循环结束时已精确维护)
+  state.isPaused = true
+  
+  activeAnnouncements.value.set(id, state)
+}
+
+// **恢复计时器**
+const resumeTimer = (id: string) => {
+  const state = activeAnnouncements.value.get(id)
+  if (!state || !state.showProgress || !state.isPaused) return
+  
+  if (state.remainingTime <= 0) {
+    closeAnnouncement(id)
+    return
+  }
+
+  // 1. 标记为未暂停
+  state.isPaused = false
+  
+  // 2. 重新启动 rAF
+  startRAFTimer(id)
+
+  activeAnnouncements.value.set(id, state)
+}
+
+
+const visibleAnnouncements = computed(() => {
+  const activeAnnouncementsList = announcements
+    .filter(announcement => activeAnnouncements.value.get(announcement.id)?.isActive)
+    .map(announcement => {
+      const activeInfo = activeAnnouncements.value.get(announcement.id)!
+      return {
+        ...announcement,
+        showProgress: activeInfo.showProgress,
+        remainingTime: activeInfo.remainingTime, 
+        isPaused: activeInfo.isPaused,
+        duration: activeInfo.duration 
+      }
+    })
+    .sort((a, b) => b.priority - a.priority)
+    .slice(0, globalConfig.maxVisible)
+
+  return activeAnnouncementsList
 })
 
-// 关闭公告 (用于手动关闭或计时结束)
 const closeAnnouncement = (id: string) => {
-  const activeInfo = activeAnnouncements.value.get(id)
+  const state = activeAnnouncements.value.get(id)
   
-  // 1. 清除定时器
-  if (activeInfo?.timer) {
-    clearTimeout(activeInfo.timer)
-  }
+  if (state?.rAFHandle) cancelAnimationFrame(state.rAFHandle)
   
-  // 2. 标记为正在关闭 (用于 CSS 过渡)
   closingAnnouncements.value.add(id)
-
-  // 3. 将其 ID 添加到 closedAnnouncements，防止 canBeActivated 再次通过
   closedAnnouncements.value.add(id) 
   
-  // 4. 等待动画结束（300ms 对应 CSS 中的 leave 动画时长）
   setTimeout(() => {
-    // 5. 从 activeAnnouncements 中移除（这将导致 visibleAnnouncements 列表更新，触发 leave 动画）
     activeAnnouncements.value.delete(id) 
-    
-    // 6. 移除 closing 状态
     closingAnnouncements.value.delete(id)
-    
-  }, 300) 
+  }, 400)
 }
 
 const handleAnnouncementClick = (announcement: AnnouncementConfig) => {
@@ -284,45 +363,36 @@ const waitForPageLoad = () => {
   })
 }
 
-// --- 监听路由变化以激活新的公告 ---
 watch(() => route.path, (newPath) => {
-    // 路由切换时，检查是否有新的公告应该被激活
-    announcements.forEach(announcement => {
-        if (canBeActivated(announcement)) {
-            initAnnouncementState(announcement);
-            setupAutoClose(announcement);
-        }
-    });
+  announcements.forEach(announcement => {
+    if (canBeActivated(announcement)) {
+      initAnnouncementState(announcement);
+      startRAFTimer(announcement.id); 
+    }
+  });
 }, { immediate: false }) 
 
-// 生命周期
 onMounted(async () => {
   await waitForPageLoad()
   await new Promise(resolve => setTimeout(resolve, globalConfig.showDelay || 500))
   
-  // 1. 显示公告系统
   showAnnouncementSystem.value = true
   
-  // 2. 首次激活可见的公告
   announcements.forEach(announcement => {
-      if (canBeActivated(announcement)) {
-          initAnnouncementState(announcement);
-          setupAutoClose(announcement);
-      }
+    if (canBeActivated(announcement)) {
+      initAnnouncementState(announcement);
+      startRAFTimer(announcement.id); 
+    }
   });
 
-  // 3. 添加键盘事件监听
   if (globalConfig.enableKeyboard) {
     document.addEventListener('keydown', handleKeydown)
   }
 })
 
 onUnmounted(() => {
-  // 清理所有定时器和状态
   activeAnnouncements.value.forEach(activeInfo => {
-    if (activeInfo.timer) {
-      clearTimeout(activeInfo.timer)
-    }
+    if (activeInfo.rAFHandle) cancelAnimationFrame(activeInfo.rAFHandle)
   })
   activeAnnouncements.value.clear()
   closingAnnouncements.value.clear()
@@ -334,30 +404,32 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* --- 顶部布局 (保持不变) --- */
+/* 核心容器优化：更精准的定位与响应式约束 */
 .announcement-system {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  max-width: 600px;
-  padding: 0 20px;
+  max-width: 580px; /* 略收窄提升精致感 */
+  padding: 0 clamp(12px, 3vw, 24px); /* 响应式内边距 */
   pointer-events: none;
+  z-index: inherit; /* 继承配置的z-index */
 }
 
 .announcement-system.position-top {
-  top: 20px;
+  top: clamp(16px, 4vh, 28px); /* 响应式顶部距离 */
 }
 
 .announcement-system.position-bottom {
-  bottom: 20px;
+  bottom: clamp(16px, 4vh, 28px); /* 响应式底部距离 */
 }
 
 .announcement-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative; 
+  position: relative;
+  gap: inherit; /* 继承配置的间距 */
 }
 
 .announcement-wrapper {
@@ -365,102 +437,118 @@ onUnmounted(() => {
   pointer-events: auto;
 }
 
-/* --- 液态玻璃/亚克力效果 (新增微模糊) --- */
+/* 公告卡片核心样式：增强玻璃态质感 */
 .announcement-toast {
   position: relative;
   width: 100%;
-  border-radius: 24px; 
+  border-radius: 14px; /* 更精致的圆角 */
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); /* 更自然的缓动 */
+  will-change: transform, opacity, box-shadow;
   
-  /* 【核心修改】：重新添加微弱的高斯模糊，提高可读性 */
-  backdrop-filter: blur(2px); 
-  -webkit-backdrop-filter: blur(2px);
+  /* 高级玻璃态效果 */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12); /* 细腻边框 */
   
-  /* 浮动阴影 + 边缘高光 */
+  /* 多层次阴影 */
   box-shadow: 
-    0 20px 50px rgba(0, 0, 0, 0.2), 
-    0 8px 20px rgba(0, 0, 0, 0.1),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.3), 
-    inset 0 1px 0 rgba(255, 255, 255, 0.25); 
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
+/* 暗色模式适配优化 */
+.dark .announcement-toast {
+  background: rgba(15, 15, 15, 0.3);
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    0 1px 3px rgba(0, 0, 0, 0.15),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+/* 悬停状态增强：更微妙的变换 */
 .announcement-toast:hover {
-  transform: translateY(-4px) scale(1.01); 
+  transform: translateY(-2px) scale(1.003); /* 更克制的缩放 */
   box-shadow: 
-    0 25px 70px rgba(0, 0, 0, 0.25), 
-    0 10px 25px rgba(0, 0, 0, 0.15),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3); 
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    0 3px 8px rgba(0, 0, 0, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
 }
 
+.dark .announcement-toast:hover {
+  background: rgba(15, 15, 15, 0.35);
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.25),
+    0 3px 8px rgba(0, 0, 0, 0.2),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* 关闭动画优化：更自然的退出 */
 .announcement-toast.closing {
   opacity: 0;
-  transform: translateY(-10px) scale(0.95);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.6, 1);
+  transform: translateY(-6px) scale(0.98);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* --- 边缘反射光带 (保持不变) --- */
-.announcement-toast::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  pointer-events: none;
-  z-index: 2; 
-  border-radius: 24px 24px 0 0;
-  
-  background: linear-gradient(
-    to right, 
-    rgba(255, 255, 255, 0) 0%, 
-    rgba(255, 255, 255, 0.7) 50%, 
-    rgba(255, 255, 255, 0) 100%
-  );
-  opacity: 0.9;
-  
-  .dark & {
-    opacity: 0.6;
-    background: linear-gradient(
-      to right, 
-      rgba(255, 255, 255, 0) 0%, 
-      rgba(255, 255, 255, 0.4) 50%, 
-      rgba(255, 255, 255, 0) 100%
-    );
-  }
-}
-
-/* --- 透明背景层 (保持高透明度) --- */
+/* 背景层次增强：渐变效果 */
 .announcement-backdrop {
   position: absolute;
   inset: 0;
-  background: var(--vp-c-bg-soft);
-  opacity: 0.2; /* 亮色模式高透明度 */
-  border-radius: 24px;
+  background: linear-gradient(135deg, var(--vp-c-bg-soft) 0%, rgba(255, 255, 255, 0.02) 100%);
+  opacity: 0.12;
+  border-radius: 14px;
+  z-index: 0;
 }
 
 .dark .announcement-backdrop {
-  background: rgba(18, 18, 18, 0.3); /* 暗色模式高透明度 */
+  background: linear-gradient(135deg, rgba(18, 18, 18, 0.3) 0%, rgba(0, 0, 0, 0.1) 100%);
 }
 
-/* --- 内容和排版 (保持不变) --- */
+/* 内容容器优化：更合理的间距 */
 .announcement-content {
   position: relative;
   display: flex;
-  align-items: flex-start;
-  padding: 16px 20px;
-  gap: 12px;
+  align-items: center;
+  padding: clamp(12px, 3vh, 16px) clamp(14px, 4vw, 20px); /* 响应式内边距 */
+  gap: clamp(10px, 2vw, 14px); /* 响应式间距 */
+  z-index: 1;
 }
 
-.announcement-icon {
+/* 图标容器：精确尺寸控制 */
+.announcement-icon-container {
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  margin-top: 2px;
-  color: var(--announcement-color);
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  will-change: transform;
 }
+
+/* 图标效果增强：微妙光晕 */
+.announcement-icon {
+  color: var(--announcement-color);
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.announcement-toast:hover .announcement-icon {
+  transform: scale(1.08);
+  filter: brightness(1.1); /* 亮度增强 */
+}
+
+.icon-svg {
+  display: block;
+  transform: translateZ(0); /* 硬件加速 */
+}
+
+/* 文本区域：排版层次优化 */
 .announcement-text {
   flex: 1;
   min-width: 0;
@@ -471,40 +559,58 @@ onUnmounted(() => {
   font-size: 14px;
   font-weight: 600;
   color: var(--vp-c-text-1);
-  line-height: 1.4;
+  line-height: 1.45;
+  letter-spacing: 0.02em; /* 微调字间距 */
 }
 
 .announcement-message {
   margin: 0;
   font-size: 13px;
   color: var(--vp-c-text-2);
-  line-height: 1.5;
+  line-height: 1.55;
   word-break: break-word;
+  letter-spacing: 0.01em; /* 微调字间距 */
 }
 
+/* 关闭按钮：精致化设计 */
 .announcement-close {
   flex-shrink: 0;
-  background: none;
+  background: rgba(255, 255, 255, 0.1);
   border: none;
   color: var(--vp-c-text-3);
   cursor: pointer;
-  padding: 4px;
-  border-radius: 8px;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s ease;
-  margin-top: -2px;
   z-index: 10;
+  opacity: 0.8; /* 默认略暗 */
 }
 
 .announcement-close:hover {
-  background: rgba(0, 0, 0, 0.1);
-  color: var(--vp-c-text-1);
-  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.18);
+  color: var(--announcement-color);
+  transform: scale(1.12);
+  opacity: 1; /* 悬停时完全显示 */
+}
+
+.close-icon {
+  transform: translateZ(0);
+}
+
+.dark .announcement-close {
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .dark .announcement-close:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
 }
 
+/* 进度条：更精致的视觉效果 */
 .announcement-progress {
   position: absolute;
   bottom: 0;
@@ -513,41 +619,22 @@ onUnmounted(() => {
   background: var(--announcement-color);
   width: 100%;
   transform-origin: left;
-  animation: progress linear forwards;
   opacity: 0.8;
   z-index: 1;
+  transition: transform 60ms linear;
+  box-shadow: 0 0 6px var(--announcement-color); /* 微妙光晕 */
 }
 
-@keyframes progress {
-  from {
-    transform: scaleX(1);
-  }
-  to {
-    transform: scaleX(0);
-  }
-}
+/* 类型颜色优化：更和谐的色调 */
+.type-info { --announcement-color: rgba(59, 130, 246, 0.85); } /* 更柔和的蓝 */
+.type-success { --announcement-color: rgba(34, 197, 94, 0.85); } /* 更柔和的绿 */
+.type-warning { --announcement-color: rgba(245, 158, 11, 0.85); } /* 更柔和的黄 */
+.type-error { --announcement-color: rgba(239, 68, 68, 0.85); } /* 更柔和的红 */
 
-/* 类型样式 (保持不变) */
-.type-info {
-  --announcement-color: #007AFF;
-}
-
-.type-success {
-  --announcement-color: #34C759;
-}
-
-.type-warning {
-  --announcement-color: #FF9500;
-}
-
-.type-error {
-  --announcement-color: #FF3B30;
-}
-
-/* --- 动画修复和增强 (保持不变) --- */
+/* 动画系统优化：更自然的过渡 */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.5s ease;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .fade-enter-from,
@@ -556,39 +643,35 @@ onUnmounted(() => {
 }
 
 .announcement-enter-active {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* 更流畅的进入曲线 */
   transition-delay: var(--delay, 0ms);
 }
 
 .announcement-leave-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.6, 1);
-  position: absolute; 
-  width: 100%; 
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: absolute;
+  width: 100%;
+  z-index: 1;
 }
 
 .announcement-enter-from {
   opacity: 0;
-  transform: translateY(-20px) scale(0.95);
+  transform: translateY(-12px) scale(0.98);
 }
 
 .announcement-leave-to {
   opacity: 0;
-  transform: translateY(-10px) scale(0.98);
+  transform: translateY(-8px) scale(0.97);
 }
 
 .announcement-move {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* --- 响应式设计 (保持不变) --- */
+/* 响应式细节优化 */
 @media (max-width: 768px) {
-  .announcement-system {
-    padding: 0 16px;
-  }
-  
-  .announcement-content {
-    padding: 14px 16px;
-    gap: 10px;
+  .announcement-toast {
+    border-radius: 12px;
   }
   
   .announcement-title {
@@ -598,33 +681,25 @@ onUnmounted(() => {
   .announcement-message {
     font-size: 12px;
   }
+  
+  .announcement-icon-container {
+    width: 24px;
+    height: 24px;
+  }
 }
 
+/* 减少动画模式适配 */
 @media (prefers-reduced-motion: reduce) {
-  .announcement-toast,
-  .announcement-toast.closing,
-  .announcement-close,
-  .announcement-enter-active,
-  .announcement-leave-active,
-  .announcement-move,
-  .fade-enter-active,
-  .fade-leave-active {
+  * {
     transition: none !important;
     animation: none !important;
   }
   
-  .announcement-toast:hover {
+  .announcement-toast:hover,
+  .announcement-close:hover,
+  .announcement-toast:hover .announcement-icon {
     transform: none;
-  }
-}
-
-@media (prefers-contrast: high) {
-  .announcement-toast {
-    border: 2px solid var(--announcement-color);
-  }
-  
-  .announcement-backdrop {
-    opacity: 1;
+    filter: none;
   }
 }
 </style>
