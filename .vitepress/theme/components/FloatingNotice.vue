@@ -97,15 +97,14 @@ watch(isDark, () => {
 
 <style scoped>
 .custom-toast {
-  min-height: 48px;
+  min-height: 44px;
   width: auto;
-  border-radius: 24px;
+  border-radius: 18px; /* 更圆润的边角，符合苹果风格 */
   
-  /* 毛玻璃效果 - 浅色模式 */
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  /* 统一毛玻璃效果参数 */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   
   position: fixed;
   bottom: 2rem;
@@ -113,21 +112,23 @@ watch(isDark, () => {
   transform: translateX(-50%) translateY(100px);
   display: flex;
   align-items: center;
+  justify-content: center; /* 确保缩起时文字居中 */
   gap: 0.5rem;
   padding: 0 16px;
   
-  color: #333;
+  color: #1d1d1f; /* 苹果风格文字颜色 */
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400; /* 苹果常用字重 */
   overflow: hidden;
   
   opacity: 0;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  /* 苹果风格动画曲线 */
+  transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
   z-index: 99999;
   pointer-events: auto;
   
   /* 默认状态 - 只显示标题 */
-  max-width: fit-content;
+  max-width: auto;
 }
 
 /* 显示状态动画 */
@@ -138,15 +139,16 @@ watch(isDark, () => {
 
 /* 鼠标悬停时展开 */
 .custom-toast:hover {
-  padding: 0 20px;
+  padding: 0 18px;
   max-width: 90vw;
   gap: 0.75rem;
+  justify-content: flex-start; /* 展开时内容左对齐 */
 }
 
 .notice-title {
   margin: 0;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   display: flex;
   align-items: center;
   gap: 0.35rem;
@@ -161,20 +163,22 @@ watch(isDark, () => {
   text-overflow: ellipsis;
   flex: 0;
   opacity: 0;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 0; /* 初始宽度为0，避免布局跳动 */
+  transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 /* 鼠标悬停时显示文本 */
 .custom-toast:hover .notice-text {
   opacity: 1;
   flex: 1;
+  width: auto;
   margin: 0 8px;
 }
 
 .notice-close {
   background: transparent;
   border: none;
-  color: rgba(50, 50, 50, 0.7);
+  color: rgba(60, 60, 60, 0.7);
   cursor: pointer;
   width: 24px;
   height: 24px;
@@ -185,31 +189,32 @@ watch(isDark, () => {
   padding: 0;
   pointer-events: auto;
   opacity: 0;
-  transform: scale(0.8) rotate(0deg);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scale(0.8); /* 只保留缩放，避免初始旋转导致错位 */
+  transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 /* 鼠标悬停时显示关闭按钮 */
 .custom-toast:hover .notice-close {
   opacity: 1;
-  transform: scale(1) rotate(0deg);
+  transform: scale(1);
 }
 
 .notice-close:hover {
   background-color: rgba(255, 255, 255, 0.2);
-  color: #333;
+  color: #1d1d1f;
   transform: rotate(90deg);
 }
 
-/* 鼠标跟随光效 */
+/* 鼠标跟随光效 - 更柔和的苹果风格光效 */
 .light-effect {
   position: absolute;
-  width: 160px;
-  height: 160px;
-  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
   border-radius: 50%;
   pointer-events: none;
-  transition: opacity 0.5s ease, transform 0.1s ease-out;
+  transition: opacity 0.5s cubic-bezier(0.25, 0.1, 0.25, 1), 
+              transform 0.15s cubic-bezier(0.25, 0.1, 0.25, 1);
   z-index: -1;
 }
 
@@ -217,30 +222,30 @@ watch(isDark, () => {
 @media (max-width: 768px) {
   .custom-toast {
     bottom: 1.5rem;
-    min-height: 44px;
+    min-height: 40px;
   }
 }
 </style>
 
-<!-- 深色模式样式 -->
+<!-- 深色模式样式 - 保持与日间相同的毛玻璃效果参数 -->
 <style>
-/* 深色模式适配 - 毛玻璃效果 */
+/* 深色模式适配 - 苹果风格深色模式 */
 html.dark .custom-toast {
-  background: rgba(30, 30, 30, 0.7) !important;
-  color: #fff !important;
+  background: rgba(28, 28, 30, 0.75) !important;
+  color: #f5f5f7 !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 html.dark .notice-close {
-  color: rgba(255, 255, 255, 0.7) !important;
+  color: rgba(200, 200, 200, 0.7) !important;
 }
 
 html.dark .notice-close:hover {
-  color: #fff !important;
+  color: #f5f5f7 !important;
   background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 html.dark .light-effect {
-  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%) !important;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%) !important;
 }
 </style>
