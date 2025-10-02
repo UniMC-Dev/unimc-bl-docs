@@ -111,14 +111,16 @@ watch(isDark, () => {
 <style scoped>
 .custom-toast {
   min-height: 48px;
-  width: auto;
-  border-radius: 24px; /* 恢复初始圆角 */
+  width: auto; /* 基础宽度自动适应 */
+  border-radius: 24px;
   
-  /* 恢复初始毛玻璃效果 */
-  background: rgba(50, 50, 50, 0.7);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* 液态玻璃效果 */
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05),
+              inset 0 0 0 1px rgba(255, 255, 255, 0.1);
   
   position: fixed;
   bottom: 2rem;
@@ -136,15 +138,13 @@ watch(isDark, () => {
   overflow: hidden;
   
   opacity: 0;
-  /* 苹果风格动画曲线 */
+  /* 增加宽度过渡动画 */
   transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
   z-index: 99999;
   pointer-events: auto;
   
-  /* 缩起时更短的长度 */
-  max-width: fit-content;
-  width: auto;
-  min-width: auto;
+  /* 缩起时仅适应标题宽度 */
+  max-width: calc(100% - 2rem);
 }
 
 /* 进入动画 */
@@ -159,13 +159,14 @@ watch(isDark, () => {
   transform: translateX(-50%) translateY(100px) scale(0.95);
 }
 
-/* 鼠标悬停时展开 */
+/* 鼠标悬停时展开 - 宽度适应内容 */
 .custom-toast:hover {
   padding: 0 20px;
-  max-width: 90vw;
   gap: 0.75rem;
-  justify-content: flex-start; /* 展开时内容左对齐 */
+  justify-content: flex-start;
   transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  box-shadow: 0 6px 35px rgba(0, 0, 0, 0.1),
+              inset 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
 .notice-title {
@@ -186,16 +187,18 @@ watch(isDark, () => {
   text-overflow: ellipsis;
   flex: 0;
   opacity: 0;
-  width: 0; /* 初始宽度为0，避免布局跳动 */
+  width: 0;
+  /* 文本宽度过渡 */
   transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-/* 鼠标悬停时显示文本 */
+/* 展开时显示文本并自动适应宽度 */
 .custom-toast:hover .notice-text {
   opacity: 1;
   flex: 1;
   width: auto;
   margin: 0 8px;
+  max-width: calc(90vw - 120px); /* 限制最大宽度避免溢出 */
 }
 
 .notice-close {
@@ -216,14 +219,13 @@ watch(isDark, () => {
   transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-/* 鼠标悬停时显示关闭按钮 */
 .custom-toast:hover .notice-close {
   opacity: 1;
   transform: scale(1);
 }
 
 .notice-close:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.15);
   color: #fff;
   transform: rotate(90deg);
 }
@@ -231,9 +233,9 @@ watch(isDark, () => {
 /* 鼠标跟随光效 */
 .light-effect {
   position: absolute;
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 70%);
   border-radius: 50%;
   pointer-events: none;
   transition: opacity 0.5s cubic-bezier(0.25, 0.1, 0.25, 1), 
@@ -247,18 +249,28 @@ watch(isDark, () => {
     bottom: 1.5rem;
     min-height: 44px;
   }
+  
+  .custom-toast:hover .notice-text {
+    max-width: calc(90vw - 100px);
+  }
 }
 </style>
 
-<!-- 深色模式样式 - 保持与日间相同的毛玻璃效果参数 -->
+<!-- 深色模式样式 -->
 <style>
 html.dark .custom-toast {
-  background: rgba(30, 30, 30, 0.9) !important;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
-  border-color: rgba(255, 255, 255, 0.05) !important;
+  background: rgba(15, 15, 20, 0.65) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2),
+              inset 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+}
+
+html.dark .custom-toast:hover {
+  box-shadow: 0 6px 35px rgba(0, 0, 0, 0.3),
+              inset 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
 }
 
 html.dark .light-effect {
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%) !important;
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%) !important;
 }
 </style>
