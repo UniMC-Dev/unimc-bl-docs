@@ -1,46 +1,38 @@
-<!-- .vitepress/theme/components/announcement.vue -->
 <template>
   <div 
     v-if="visible" 
-    class="floating-notice"
-    :class="{ 'notice-hidden': !visible }"
+    class="announcement"
+    :class="{ 'announcement-hidden': !visible }"
   >
-    <div class="notice-fcontent">
-      <h3 class="notice-ftitle">📢 {{ ftitle }}</h3>
-      <p class="notice-ftext">{{ fcontent }}</p>
+    <div class="announcement-content">
+      <h3 class="announcement-title">📢 {{ title }}</h3>
+      <p class="announcement-text">{{ content }}</p>
       <button 
-        class="notice-close" 
+        class="announcement-close" 
         @click="handleClose"
         aria-label="关闭公告"
       >
-        ×
       </button>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useStorage } from '@vueuse/core'
 
-// 组件属性定义
-const props = defineProps({
-  ftitle: {
-    type: String,
-    default: '最新公告'
-  },
-  fcontent: {
-    type: String,
-    required: true
-  },
-  fstorageKey: {
-    type: String,
-    default: 'floating_notice_closed'
-  },
-  fduration: {
-    type: Number,
-    default: 0 // 0表示不自动关闭
-  }
+interface Props {
+  title: string
+  content: string
+  storageKey: string
+  duration: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  title: '最新公告',
+  content: '',
+  storageKey: 'announcement_closed',
+  duration: 0 // 0表示不自动关闭
 })
 
 // 状态管理 - 使用本地存储记录关闭状态
@@ -66,8 +58,8 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.floating-notice {
+<style>
+.announcement {
   position: fixed;
   top: 2rem;
   left: 50%;
@@ -79,23 +71,22 @@ onMounted(() => {
   animation: floatIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.notice-fcontent {
-  background-color: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(10px);
+.announcement-content {
+  background-color: var(--vp-c-bg-soft);
   border: 1px solid var(--vp-c-divider);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 1.5rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   position: relative;
   transition: all 0.3s ease;
 }
 
-.notice-fcontent:hover {
+.announcement-content:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
 }
 
-.notice-ftitle {
+.announcement-title {
   margin: 0 0 0.75rem 0;
   color: var(--vp-c-brand-1);
   font-size: 1.2rem;
@@ -104,13 +95,14 @@ onMounted(() => {
   gap: 0.5rem;
 }
 
-.notice-ftext {
+.announcement-text {
   margin: 0;
   color: var(--vp-c-text-1);
   line-height: 1.6;
+  font-size: 14px;
 }
 
-.notice-close {
+.announcement-close {
   position: absolute;
   top: 1rem;
   right: 1rem;
@@ -128,20 +120,20 @@ onMounted(() => {
   transition: all 0.2s ease;
 }
 
-.notice-close:hover {
+.announcement-close:hover {
   background-color: var(--vp-c-bg-mute);
   color: var(--vp-c-text-1);
 }
 
-.notice-hidden {
+.announcement-hidden {
   opacity: 0;
   transform: translate(-50%, -20px);
   pointer-events: none;
 }
 
 /* 深色模式适配 */
-:deep(.dark) .notice-content {
-  background-color: rgba(15, 15, 15, 0.85);
+:deep(.dark) .announcement-content {
+  background-color: var(--vp-c-bg-soft-dark);
   border-color: var(--vp-c-divider-dark);
 }
 
@@ -158,11 +150,11 @@ onMounted(() => {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .notice-fcontent {
+  .announcement-content {
     padding: 1.25rem;
   }
   
-  .notice-ftitle {
+  .announcement-title {
     font-size: 1.1rem;
   }
 }
