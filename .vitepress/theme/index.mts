@@ -4,7 +4,7 @@ import Linkcard from "./components/Linkcard.vue";
 import CommandExplorer from './components/CommandExplorer.vue';
 import { h } from 'vue';
 import Mylayout from "./components/Mylayout.vue";
-import FloatingNotice from "./components/FloatingNotice.vue";
+import announcementtoast from "./components/announcementtoast.vue";
 
 export default {
   ...DefaultTheme,
@@ -18,9 +18,10 @@ export default {
     app.component('Linkcard', Linkcard);
     app.component('CommandExplorer', CommandExplorer);
     app.component('MyLayout', Mylayout);
-    app.component('FloatingNotice', FloatingNotice);
+    app.component('Fannouncementtoast', announcementtoast);
   }
 
 }
+
 
 
