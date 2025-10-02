@@ -51,22 +51,22 @@ npm run docs:build  # 打包成静态文件（就像把物品放进箱子）
 npm run docs:preview  # 预览打包结果（开箱检查）
 ## 文件夹长啥样？
 unimc-bl-docs/
-├── docs/                 # 文档本体（全是知识点）
-│   ├── all/              # 通用内容（公告、FAQ 啥的）
-│   ├── mcbucket/         # MCBUCKET 服务器专属攻略
-│   └── mclume/           # MCLUME 服务器秘籍
-├── public/               # 静态资源（图片、图标，比战利品还香）
-├── .vitepress/           # VitePress 配置（相当于服务器配置文件）
-│   ├── config.mts        # 站点设置（改个名、换个图标都在这）
-│   ├── theme/            # 主题定制（换皮肤就找它）
-│   │   ├── style/        # 样式文件（改颜色、调布局）
-│   │   │   ├── blockquote.css  # 引用块样式
-│   │   │   ├── custom-block.css # 自定义块样式
-│   │   │   └── var.css    # 变量定义（颜色、尺寸啥的）
+├── docs/
+│   ├── all/
+│   ├── mcbucket/
+│   └── mclume/
+├── public/
+├── .vitepress/
+│   ├── config.mts
+│   ├── theme/
+│   │   ├── style/
+│   │   │   ├── blockquot
+│   │   │   ├── custom-block.css
+│   │   │   └── var.css
 │   │   └── plugins/
-│   │       └── announcement/  # 公告插件（消息推送全靠它）
-├── package.json          # 依赖清单（需要啥工具都在这写着）
-└── LICENSE               # 许可证（规矩还是要讲的）
+│   │       └── announcement/
+├── package.json
+└── LICENSE
 ## 公告插件咋玩？
 
 这插件比红石电路简单，看一眼就会：
