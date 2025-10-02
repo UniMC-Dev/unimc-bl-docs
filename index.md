@@ -28,11 +28,6 @@ features:
     title: 性能
     details: 5800X | 128GB 更流畅！
 ---
-<AnnouncementToast 
-  message="这是一条重要公告内容，会在5秒后自动消失" 
-  :duration="5000" 
-  :showIcon="true"
-/>
 <!-- 美观低多边形动态背景 -->
 <div class="geo-background">
   <canvas id="geo-canvas"></canvas>
