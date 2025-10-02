@@ -28,18 +28,12 @@ features:
     title: 性能
     details: 5800X | 128GB 更流畅！
 ---
-<div class="announcement-container">
-  <div class="announcement-header">
-    <h3 class="announcement-title">📢 最新公告</h3>
-    <span class="announcement-date">2025-10-2</span>
-  </div>
-  <p class="announcement-content">
-    服务器公告。
-  </p>
-  <a href="/docs/logs.md" class="announcement-link">
-    查看详情 →
-  </a>
-</div>
+<FloatingNotice 
+  title="公告" 
+  content="服务器。"
+  storageKey="update_notice_2025_10_2"
+  duration="0"
+/>
 <!-- 美观低多边形动态背景 -->
 <div class="geo-background">
   <canvas id="geo-canvas"></canvas>
