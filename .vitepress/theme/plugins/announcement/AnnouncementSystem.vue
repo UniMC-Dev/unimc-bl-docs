@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <div 
-      v-if="visibleAnnouncements.length > 0"
+      v-if="showAnnouncementSystem && visibleAnnouncements.length > 0"
       class="announcement-system"
       :class="`position-${globalConfig.position || 'top'}`"
       :style="{ zIndex: globalConfig.zIndex }"
@@ -75,7 +75,7 @@ import { ref, computed, onMounted, onUnmounted, nextTick, h, watch } from 'vue'
 import { useRoute } from 'vitepress'
 import { announcements, globalConfig, type AnnouncementConfig } from './config'
 
-// 图标组件（保持不变）
+// 图标组件
 const InfoIcon = () => h('svg', {
   viewBox: '0 0 24 24',
   width: '20',
@@ -133,6 +133,7 @@ const CloseIcon = () => h('svg', {
 
 // 状态管理
 const route = useRoute()
+const showAnnouncementSystem = ref(false) // 控制整个公告系统的显示
 const closedAnnouncements = ref<Set<string>>(new Set())
 const closingAnnouncements = ref<Set<string>>(new Set())
 const activeAnnouncements = ref<Map<string, {
@@ -153,7 +154,7 @@ const getIconComponent = (type: string) => {
   return iconMap[type as keyof typeof iconMap] || InfoIcon
 }
 
-// 修复路径匹配逻辑 - 这是关键修复
+// 路径匹配辅助函数
 const isPathMatched = (currentPath: string, targetPath: string): boolean => {
   const normalizePath = (path: string) => {
     if (path === '/') return path
@@ -201,7 +202,7 @@ const shouldShowAnnouncement = (announcement: AnnouncementConfig): boolean => {
   if (announcement.target && announcement.target.length > 0) {
     const currentPath = route.path
     
-    // 关键修复：只要当前路径匹配任意一个目标路径，就应该显示
+    // 只要当前路径匹配任意一个目标路径，就应该显示
     const isMatched = announcement.target.some(targetPath => 
       isPathMatched(currentPath, targetPath)
     )
@@ -244,7 +245,7 @@ const visibleAnnouncements = computed(() => {
   return nowVisible
 })
 
-// 初始化或恢复公告状态
+// 初始化公告状态
 const initAnnouncementState = (announcement: AnnouncementConfig) => {
   if (!activeAnnouncements.value.has(announcement.id)) {
     activeAnnouncements.value.set(announcement.id, {
@@ -272,42 +273,6 @@ const setupAutoClose = (announcement: AnnouncementConfig) => {
   }, activeInfo.remainingTime) as unknown as number
 
   activeAnnouncements.value.set(announcement.id, activeInfo)
-}
-
-// 暂停公告计时器
-const pauseAnnouncementTimer = (announcementId: string) => {
-  const activeInfo = activeAnnouncements.value.get(announcementId)
-  if (!activeInfo || !activeInfo.timer) return
-
-  // 计算剩余时间
-  const elapsed = Date.now() - activeInfo.startTime
-  activeInfo.remainingTime = Math.max(0, activeInfo.remainingTime - elapsed)
-  
-  // 清除定时器
-  clearTimeout(activeInfo.timer)
-  activeInfo.timer = null
-  activeInfo.showProgress = false
-
-  activeAnnouncements.value.set(announcementId, activeInfo)
-}
-
-// 恢复公告计时器
-const resumeAnnouncementTimer = (announcementId: string) => {
-  const announcement = announcements.find(a => a.id === announcementId)
-  const activeInfo = activeAnnouncements.value.get(announcementId)
-  
-  if (!announcement || !activeInfo || announcement.duration <= 0) return
-
-  // 重置开始时间
-  activeInfo.startTime = Date.now()
-  activeInfo.showProgress = true
-
-  // 设置定时器
-  activeInfo.timer = setTimeout(() => {
-    closeAnnouncement(announcementId)
-  }, activeInfo.remainingTime) as unknown as number
-
-  activeAnnouncements.value.set(announcementId, activeInfo)
 }
 
 // 关闭公告
@@ -344,22 +309,25 @@ const handleKeydown = (event: KeyboardEvent) => {
   }
 }
 
-// 路由变化处理 - 修复计时器管理逻辑
-watch(() => route.path, (newPath, oldPath) => {
-  // 为所有可见公告设置正确的计时器状态
-  visibleAnnouncements.value.forEach(announcement => {
-    const activeInfo = activeAnnouncements.value.get(announcement.id)
-    
-    if (!activeInfo) {
-      // 如果还没有状态，初始化
-      initAnnouncementState(announcement)
-      setupAutoClose(announcement)
-    } else if (activeInfo.timer === null && announcement.duration > 0) {
-      // 如果有状态但没有计时器，恢复计时器
-      resumeAnnouncementTimer(announcement.id)
+// 检查页面是否已加载完成
+const isPageLoaded = () => {
+  return document.readyState === 'complete'
+}
+
+// 等待页面加载完成
+const waitForPageLoad = () => {
+  return new Promise<void>((resolve) => {
+    if (isPageLoaded()) {
+      resolve()
+    } else {
+      const onLoad = () => {
+        window.removeEventListener('load', onLoad)
+        resolve()
+      }
+      window.addEventListener('load', onLoad)
     }
   })
-})
+}
 
 // 监听可见公告的变化，确保新出现的公告正确初始化
 watch(visibleAnnouncements, (newVisible, oldVisible) => {
@@ -377,8 +345,14 @@ watch(visibleAnnouncements, (newVisible, oldVisible) => {
 
 // 生命周期
 onMounted(async () => {
-  // 延迟显示公告
-  await new Promise(resolve => setTimeout(resolve, globalConfig.showDelay))
+  // 等待页面加载完成
+  await waitForPageLoad()
+  
+  // 延迟显示公告系统（0.5秒）
+  await new Promise(resolve => setTimeout(resolve, globalConfig.showDelay || 500))
+  
+  // 显示公告系统
+  showAnnouncementSystem.value = true
   
   // 初始化可见公告的状态
   visibleAnnouncements.value.forEach(announcement => {
@@ -412,7 +386,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* 样式保持不变 */
 .announcement-system {
   position: fixed;
   left: 50%;
