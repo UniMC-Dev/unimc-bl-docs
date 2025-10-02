@@ -1,72 +1,68 @@
 <template>
   <Teleport to="body">
-    <div 
-      v-if="showAnnouncementSystem && visibleAnnouncements.length > 0"
-      class="announcement-system"
-      :class="`position-${globalConfig.position || 'top'}`"
-      :style="{ zIndex: globalConfig.zIndex }"
-    >
-      <TransitionGroup
-        name="announcement"
-        tag="div"
-        class="announcement-container"
-        :style="{ gap: `${globalConfig.spacing}px` }"
+    <Transition name="fade">
+      <div 
+        v-if="showAnnouncementSystem && visibleAnnouncements.length > 0"
+        class="announcement-system"
+        :class="`position-${globalConfig.position || 'top'}`"
+        :style="{ zIndex: globalConfig.zIndex }"
       >
-        <div
-          v-for="(announcement, index) in visibleAnnouncements"
-          :key="announcement.id"
-          class="announcement-wrapper"
-          :style="{ '--delay': `${index * 100}ms` }"
+        <TransitionGroup
+          name="announcement"
+          tag="div"
+          class="announcement-container"
+          :style="{ gap: `${globalConfig.spacing}px` }"
         >
           <div
-            class="announcement-toast"
-            :class="[
-              `type-${announcement.type}`,
-              { 'with-icon': announcement.showIcon },
-              { 'closable': announcement.closable },
-              { 'closing': closingAnnouncements.has(announcement.id) }
-            ]"
-            @click="handleAnnouncementClick(announcement)"
+            v-for="(announcement, index) in visibleAnnouncements"
+            :key="announcement.id"
+            class="announcement-wrapper"
+            :style="{ '--delay': `${index * 100}ms` }"
           >
-            <!-- 背景模糊效果 -->
-            <div class="announcement-backdrop"></div>
-            
-            <!-- 内容区域 -->
-            <div class="announcement-content">
-              <!-- 图标 -->
-              <div v-if="announcement.showIcon" class="announcement-icon">
-                <component :is="getIconComponent(announcement.type)" />
-              </div>
-              
-              <!-- 文本内容 -->
-              <div class="announcement-text">
-                <h4 v-if="announcement.title" class="announcement-title">
-                  {{ announcement.title }}
-                </h4>
-                <p class="announcement-message">{{ announcement.content }}</p>
-              </div>
-              
-              <!-- 关闭按钮 -->
-              <button
-                v-if="announcement.closable"
-                class="announcement-close"
-                @click.stop="closeAnnouncement(announcement.id)"
-                :aria-label="'关闭公告'"
-              >
-                <CloseIcon />
-              </button>
-            </div>
-            
-            <!-- 进度条 -->
             <div
-              v-if="announcement.duration > 0 && announcement.showProgress"
-              class="announcement-progress"
-              :style="{ animationDuration: `${announcement.remainingTime}ms` }"
-            ></div>
+              class="announcement-toast"
+              :class="[
+                `type-${announcement.type}`,
+                { 'with-icon': announcement.showIcon },
+                { 'closable': announcement.closable },
+                { 'closing': closingAnnouncements.has(announcement.id) }
+              ]"
+              @click="handleAnnouncementClick(announcement)"
+            >
+              <div class="announcement-backdrop"></div>
+              
+              <div class="announcement-content">
+                <div v-if="announcement.showIcon" class="announcement-icon">
+                  <component :is="getIconComponent(announcement.type)" />
+                </div>
+                
+                <div class="announcement-text">
+                  <h4 v-if="announcement.title" class="announcement-title">
+                    {{ announcement.title }}
+                  </h4>
+                  <p class="announcement-message">{{ announcement.content }}</p>
+                </div>
+                
+                <button
+                  v-if="announcement.closable"
+                  class="announcement-close"
+                  @click.stop="closeAnnouncement(announcement.id)"
+                  :aria-label="'关闭公告'"
+                >
+                  <CloseIcon />
+                </button>
+              </div>
+              
+              <div
+                v-if="announcement.duration > 0 && announcement.showProgress"
+                class="announcement-progress"
+                :style="{ animationDuration: `${announcement.remainingTime}ms` }"
+              ></div>
+            </div>
           </div>
-        </div>
-      </TransitionGroup>
-    </div>
+        </TransitionGroup>
+      </div>
+    </Transition>
   </Teleport>
 </template>
 
@@ -75,121 +71,99 @@ import { ref, computed, onMounted, onUnmounted, nextTick, h, watch } from 'vue'
 import { useRoute } from 'vitepress'
 import { announcements, globalConfig, type AnnouncementConfig } from './config'
 
-// 图标组件
+// --- 图标组件定义 (保持不变) ---
 const InfoIcon = () => h('svg', {
   viewBox: '0 0 24 24',
   width: '20',
   height: '20',
-  fill: 'currentColor'
-}, [
+  fill: 'currentColor'}, [
   h('path', {
     d: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'
-  })
-])
-
+  })])
 const SuccessIcon = () => h('svg', {
   viewBox: '0 0 24 24',
   width: '20',
   height: '20',
-  fill: 'currentColor'
-}, [
+  fill: 'currentColor'}, [
   h('path', {
     d: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'
-  })
-])
-
+  })])
 const WarningIcon = () => h('svg', {
   viewBox: '0 0 24 24',
   width: '20',
   height: '20',
-  fill: 'currentColor'
-}, [
+  fill: 'currentColor'}, [
   h('path', {
     d: 'M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z'
-  })
-])
-
+  })])
 const ErrorIcon = () => h('svg', {
   viewBox: '0 0 24 24',
   width: '20',
   height: '20',
-  fill: 'currentColor'
-}, [
+  fill: 'currentColor'}, [
   h('path', {
     d: 'M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z'
-  })
-])
-
+  })])
 const CloseIcon = () => h('svg', {
   viewBox: '0 0 24 24',
   width: '16',
   height: '16',
-  fill: 'currentColor'
-}, [
+  fill: 'currentColor'}, [
   h('path', {
     d: 'M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'
-  })
-])
-
-// 状态管理
+  })])
+// --- 状态管理 ---
 const route = useRoute()
-const showAnnouncementSystem = ref(false) // 控制整个公告系统的显示
-const closedAnnouncements = ref<Set<string>>(new Set())
-const closingAnnouncements = ref<Set<string>>(new Set())
+const showAnnouncementSystem = ref(false) 
+const closedAnnouncements = ref<Set<string>>(new Set()) // 永久关闭/已结束的公告
+const closingAnnouncements = ref<Set<string>>(new Set()) // 正在执行关闭动画的公告
 const activeAnnouncements = ref<Map<string, {
   startTime: number
   remainingTime: number
   showProgress: boolean
   timer: number | null
-}>>(new Map())
+  isActive: boolean // 关键：表示公告当前是否处于生命周期中
+}>>(new Map()) 
 
-// 获取图标组件
+// --- 工具函数 (保持不变) ---
 const getIconComponent = (type: string) => {
-  const iconMap = {
-    info: InfoIcon,
-    success: SuccessIcon,
-    warning: WarningIcon,
-    error: ErrorIcon
-  }
+  const iconMap = { info: InfoIcon, success: SuccessIcon, warning: WarningIcon, error: ErrorIcon }
   return iconMap[type as keyof typeof iconMap] || InfoIcon
 }
 
-// 路径匹配辅助函数
 const isPathMatched = (currentPath: string, targetPath: string): boolean => {
   const normalizePath = (path: string) => {
     if (path === '/') return path
     return path.endsWith('/') ? path.slice(0, -1) : path
   }
-  
   const normalizedCurrent = normalizePath(currentPath)
   const normalizedTarget = normalizePath(targetPath)
   
-  // 首页特殊处理
   if (normalizedTarget === '/') {
     return normalizedCurrent === '/' || normalizedCurrent === '/index' || normalizedCurrent === ''
   }
-  
-  // 精确匹配
   if (normalizedCurrent === normalizedTarget) {
     return true
   }
-  
-  // 前缀匹配（确保是完整的路径段）
   if (normalizedCurrent.startsWith(normalizedTarget + '/')) {
     return true
   }
-  
   return false
 }
 
-// 检查公告是否应该显示
-const shouldShowAnnouncement = (announcement: AnnouncementConfig): boolean => {
-  // 检查是否已关闭
+// 检查公告是否“有资格”在当前路由下“首次”显示
+const canBeActivated = (announcement: AnnouncementConfig): boolean => {
+  // 1. 检查是否已关闭/已结束
   if (closedAnnouncements.value.has(announcement.id)) {
     return false
   }
   
-  // 检查时间范围
+  // 2. 检查是否已经处于活跃状态（如果已活跃，则返回 false，防止重复激活）
+  if (activeAnnouncements.value.get(announcement.id)?.isActive) {
+      return false
+  }
+
+  // 3. 检查时间范围
   const now = new Date()
   if (announcement.startTime && new Date(announcement.startTime) > now) {
     return false
@@ -198,61 +172,25 @@ const shouldShowAnnouncement = (announcement: AnnouncementConfig): boolean => {
     return false
   }
   
-  // 检查页面路径
+  // 4. 检查页面路径
   if (announcement.target && announcement.target.length > 0) {
     const currentPath = route.path
-    
-    // 只要当前路径匹配任意一个目标路径，就应该显示
-    const isMatched = announcement.target.some(targetPath => 
-      isPathMatched(currentPath, targetPath)
-    )
-    
-    // 调试信息
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`🔍 公告路径匹配调试 [${announcement.id}]:`, {
-        currentPath,
-        targetPaths: announcement.target,
-        isMatched,
-        matchDetails: announcement.target.map(target => ({
-          target,
-          matched: isPathMatched(currentPath, target)
-        }))
-      })
-    }
-    
-    return isMatched
+    return announcement.target.some(targetPath => isPathMatched(currentPath, targetPath))
   }
   
-  // 如果没有指定目标路径，默认在所有页面显示
   return true
 }
 
-// 计算可见的公告（包含状态信息）
-const visibleAnnouncements = computed(() => {
-  const nowVisible = announcements
-    .filter(shouldShowAnnouncement)
-    .sort((a, b) => b.priority - a.priority)
-    .slice(0, globalConfig.maxVisible)
-    .map(announcement => {
-      const activeInfo = activeAnnouncements.value.get(announcement.id)
-      return {
-        ...announcement,
-        showProgress: activeInfo?.showProgress ?? (announcement.duration > 0),
-        remainingTime: activeInfo?.remainingTime ?? announcement.duration
-      }
-    })
-
-  return nowVisible
-})
-
-// 初始化公告状态
+// 初始化/激活公告状态
 const initAnnouncementState = (announcement: AnnouncementConfig) => {
-  if (!activeAnnouncements.value.has(announcement.id)) {
+  // 仅在未激活状态下才初始化
+  if (!activeAnnouncements.value.get(announcement.id)?.isActive) {
     activeAnnouncements.value.set(announcement.id, {
       startTime: Date.now(),
       remainingTime: announcement.duration,
       showProgress: announcement.duration > 0,
-      timer: null
+      timer: null,
+      isActive: true // 标记为已激活
     })
   }
 }
@@ -260,46 +198,67 @@ const initAnnouncementState = (announcement: AnnouncementConfig) => {
 // 设置自动关闭定时器
 const setupAutoClose = (announcement: AnnouncementConfig) => {
   const activeInfo = activeAnnouncements.value.get(announcement.id)
-  if (!activeInfo || announcement.duration <= 0) return
-
-  // 清除现有定时器
-  if (activeInfo.timer) {
-    clearTimeout(activeInfo.timer)
-  }
+  // 如果没有活跃信息，或者没有设置时长，或者定时器已存在，则退出
+  if (!activeInfo || announcement.duration <= 0 || activeInfo.timer) return
 
   // 设置新定时器
   activeInfo.timer = setTimeout(() => {
+    // 自动关闭时调用 closeAnnouncement
     closeAnnouncement(announcement.id)
   }, activeInfo.remainingTime) as unknown as number
 
   activeAnnouncements.value.set(announcement.id, activeInfo)
 }
 
-// 关闭公告
+// **【核心 computed 属性】** 计算可见的公告
+const visibleAnnouncements = computed(() => {
+    // 仅显示所有当前处于“isActive: true”的公告，**忽略当前路由的路径匹配**。
+    const activeAnnouncementsList = announcements
+        .filter(announcement => activeAnnouncements.value.get(announcement.id)?.isActive)
+        .map(announcement => {
+            const activeInfo = activeAnnouncements.value.get(announcement.id)!
+            return {
+                ...announcement,
+                showProgress: activeInfo.showProgress,
+                remainingTime: activeInfo.remainingTime
+            }
+        })
+        .sort((a, b) => b.priority - a.priority)
+        .slice(0, globalConfig.maxVisible)
+
+    return activeAnnouncementsList
+})
+
+// 关闭公告 (用于手动关闭或计时结束)
 const closeAnnouncement = (id: string) => {
-  // 标记为正在关闭
-  closingAnnouncements.value.add(id)
-  
-  // 清除定时器
   const activeInfo = activeAnnouncements.value.get(id)
+  
+  // 1. 清除定时器
   if (activeInfo?.timer) {
     clearTimeout(activeInfo.timer)
   }
-  activeAnnouncements.value.delete(id)
   
-  // 延迟添加到已关闭列表
+  // 2. 标记为正在关闭 (用于 CSS 过渡)
+  closingAnnouncements.value.add(id)
+
+  // 3. 将其 ID 添加到 closedAnnouncements，防止 canBeActivated 再次通过
+  closedAnnouncements.value.add(id) 
+  
+  // 4. 等待动画结束（300ms 对应 CSS 中的 leave 动画时长）
   setTimeout(() => {
-    closedAnnouncements.value.add(id)
+    // 5. 从 activeAnnouncements 中移除（这将导致 visibleAnnouncements 列表更新，触发 leave 动画）
+    activeAnnouncements.value.delete(id) 
+    
+    // 6. 移除 closing 状态
     closingAnnouncements.value.delete(id)
-  }, 300)
+    
+  }, 300) 
 }
 
-// 处理公告点击
 const handleAnnouncementClick = (announcement: AnnouncementConfig) => {
   console.log('Announcement clicked:', announcement.id)
 }
 
-// 键盘事件处理
 const handleKeydown = (event: KeyboardEvent) => {
   if (globalConfig.enableKeyboard && event.key === 'Escape') {
     const latestAnnouncement = visibleAnnouncements.value[0]
@@ -309,12 +268,8 @@ const handleKeydown = (event: KeyboardEvent) => {
   }
 }
 
-// 检查页面是否已加载完成
-const isPageLoaded = () => {
-  return document.readyState === 'complete'
-}
+const isPageLoaded = () => document.readyState === 'complete'
 
-// 等待页面加载完成
 const waitForPageLoad = () => {
   return new Promise<void>((resolve) => {
     if (isPageLoaded()) {
@@ -329,56 +284,49 @@ const waitForPageLoad = () => {
   })
 }
 
-// 监听可见公告的变化，确保新出现的公告正确初始化
-watch(visibleAnnouncements, (newVisible, oldVisible) => {
-  // 找出新出现的公告
-  const newAnnouncements = newVisible.filter(
-    ann => !oldVisible.some(oldAnn => oldAnn.id === ann.id)
-  )
-  
-  // 为新公告初始化状态和计时器
-  newAnnouncements.forEach(announcement => {
-    initAnnouncementState(announcement)
-    setupAutoClose(announcement)
-  })
-})
+// --- 监听路由变化以激活新的公告 ---
+watch(() => route.path, (newPath) => {
+    // 路由切换时，检查是否有新的公告应该被激活
+    announcements.forEach(announcement => {
+        if (canBeActivated(announcement)) {
+            initAnnouncementState(announcement);
+            setupAutoClose(announcement);
+        }
+    });
+}, { immediate: false }) 
 
 // 生命周期
 onMounted(async () => {
-  // 等待页面加载完成
   await waitForPageLoad()
-  
-  // 延迟显示公告系统（0.5秒）
   await new Promise(resolve => setTimeout(resolve, globalConfig.showDelay || 500))
   
-  // 显示公告系统
+  // 1. 显示公告系统
   showAnnouncementSystem.value = true
   
-  // 初始化可见公告的状态
-  visibleAnnouncements.value.forEach(announcement => {
-    initAnnouncementState(announcement)
-    setupAutoClose(announcement)
-  })
-  
-  // 添加键盘事件监听
+  // 2. 首次激活可见的公告
+  announcements.forEach(announcement => {
+      if (canBeActivated(announcement)) {
+          initAnnouncementState(announcement);
+          setupAutoClose(announcement);
+      }
+  });
+
+  // 3. 添加键盘事件监听
   if (globalConfig.enableKeyboard) {
     document.addEventListener('keydown', handleKeydown)
   }
 })
 
 onUnmounted(() => {
-  // 清除所有定时器
+  // 清理所有定时器和状态
   activeAnnouncements.value.forEach(activeInfo => {
     if (activeInfo.timer) {
       clearTimeout(activeInfo.timer)
     }
   })
   activeAnnouncements.value.clear()
-  
-  // 清理状态
   closingAnnouncements.value.clear()
   
-  // 移除键盘事件监听
   if (globalConfig.enableKeyboard) {
     document.removeEventListener('keydown', handleKeydown)
   }
@@ -408,6 +356,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
 }
 
 .announcement-wrapper {
@@ -553,7 +502,18 @@ onUnmounted(() => {
   --announcement-color: #FF3B30;
 }
 
-/* 动画 */
+/* 公告系统淡入动画 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* 公告项动画 */
 .announcement-enter-active {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   transition-delay: var(--delay, 0ms);
@@ -561,6 +521,9 @@ onUnmounted(() => {
 
 .announcement-leave-active {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.6, 1);
+    position: absolute; 
+  /* 确保元素在脱离文档流后仍能占据全部宽度 */
+  width: 100%; 
 }
 
 .announcement-enter-from {
@@ -604,7 +567,9 @@ onUnmounted(() => {
   .announcement-close,
   .announcement-enter-active,
   .announcement-leave-active,
-  .announcement-move {
+  .announcement-move,
+  .fade-enter-active,
+  .fade-leave-active {
     transition: none !important;
     animation: none !important;
   }
