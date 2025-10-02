@@ -17,6 +17,17 @@ hero:
       text: 了解UNIMC
       link: https://mc.clami.fun
 
+features:
+  - icon: <?xml version="1.0" encoding="UTF-8"?><svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 8C8.92487 8 4 12.9249 4 19C4 30 17 40 24 42.3262C31 40 44 30 44 19C44 12.9249 39.0751 8 33 8C29.2797 8 25.9907 9.8469 24 12.6738C22.0093 9.8469 18.7203 8 15 8Z" fill="none" stroke="#ff0000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    title: 始终如一
+    details: 纯公益运行至今已有五年历史，
+  - icon: <?xml version="1.0" encoding="UTF-8"?><svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M33 38H22V30H36V22H44V38H39L36 41L33 38Z" stroke="#0044ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 6H36V30H17L13 34L9 30H4V6Z" fill="none" stroke="#0044ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 18H20" stroke="#0044ff" stroke-width="4" stroke-linecap="round"/><path d="M26 18H27" stroke="#0044ff" stroke-width="4" stroke-linecap="round"/><path d="M12 18H13" stroke="#0044ff" stroke-width="4" stroke-linecap="round"/></svg>
+    title: 倾听
+    details: 坚守玩家为本，体验至上
+  - icon: <?xml version="1.0" encoding="UTF-8"?><svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M31 4H16L10 27H18L14 44L40 16H28L31 4Z" fill="none" stroke="#00ff0f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 11L19 19" stroke="#00ff0f" stroke-width="4" stroke-linecap="round"/></svg>
+    title: 性能
+    details: 5800X | 128GB 更流畅！
+---
 <div class="announcement-container">
   <div class="announcement-header">
     <h3 class="announcement-title">📢 最新公告</h3>
@@ -29,18 +40,6 @@ hero:
     查看详情 →
   </a>
 </div>
-
-features:
-  - icon: <?xml version="1.0" encoding="UTF-8"?><svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 8C8.92487 8 4 12.9249 4 19C4 30 17 40 24 42.3262C31 40 44 30 44 19C44 12.9249 39.0751 8 33 8C29.2797 8 25.9907 9.8469 24 12.6738C22.0093 9.8469 18.7203 8 15 8Z" fill="none" stroke="#ff0000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    title: 始终如一
-    details: 纯公益运行至今已有五年历史，
-  - icon: <?xml version="1.0" encoding="UTF-8"?><svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M33 38H22V30H36V22H44V38H39L36 41L33 38Z" stroke="#0044ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 6H36V30H17L13 34L9 30H4V6Z" fill="none" stroke="#0044ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 18H20" stroke="#0044ff" stroke-width="4" stroke-linecap="round"/><path d="M26 18H27" stroke="#0044ff" stroke-width="4" stroke-linecap="round"/><path d="M12 18H13" stroke="#0044ff" stroke-width="4" stroke-linecap="round"/></svg>
-    title: 倾听
-    details: 坚守玩家为本，体验至上
-  - icon: <?xml version="1.0" encoding="UTF-8"?><svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M31 4H16L10 27H18L14 44L40 16H28L31 4Z" fill="none" stroke="#00ff0f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 11L19 19" stroke="#00ff0f" stroke-width="4" stroke-linecap="round"/></svg>
-    title: 性能
-    details: 5800X | 128GB 更流畅！
----
 <!-- 美观低多边形动态背景 -->
 <div class="geo-background">
   <canvas id="geo-canvas"></canvas>
