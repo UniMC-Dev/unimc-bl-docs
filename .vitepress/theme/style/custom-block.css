@@ -72,7 +72,6 @@
 }
 
 .dark {
-    --vp-c-bg: #ffffff00;
     --vp-home-hero-name-color: #7096d8;
     --vp-button-brand-border: #7096d8;
     --custom-block-info-left: #8ca0b3;
@@ -243,6 +242,7 @@
     left: -5px;
     top: -1px;
 }
+
 
 
 
