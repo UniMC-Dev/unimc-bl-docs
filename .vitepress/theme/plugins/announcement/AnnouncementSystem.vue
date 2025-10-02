@@ -148,6 +148,35 @@ const getIconComponent = (type: string) => {
   return iconMap[type as keyof typeof iconMap] || InfoIcon
 }
 
+// 路径匹配辅助函数
+const isPathMatched = (currentPath: string, targetPath: string): boolean => {
+  // 规范化路径（移除尾部斜杠，除非是根路径）
+  const normalizePath = (path: string) => {
+    if (path === '/') return path
+    return path.endsWith('/') ? path.slice(0, -1) : path
+  }
+  
+  const normalizedCurrent = normalizePath(currentPath)
+  const normalizedTarget = normalizePath(targetPath)
+  
+  // 精确匹配首页
+  if (normalizedTarget === '/') {
+    return normalizedCurrent === '/' || normalizedCurrent === '/index'
+  }
+  
+  // 精确匹配
+  if (normalizedCurrent === normalizedTarget) {
+    return true
+  }
+  
+  // 前缀匹配（确保是完整的路径段）
+  if (normalizedCurrent.startsWith(normalizedTarget + '/')) {
+    return true
+  }
+  
+  return false
+}
+
 // 检查公告是否应该显示
 const shouldShowAnnouncement = (announcement: AnnouncementConfig): boolean => {
   // 检查是否已关闭（但不包括正在关闭的，让它们有时间播放动画）
@@ -167,9 +196,24 @@ const shouldShowAnnouncement = (announcement: AnnouncementConfig): boolean => {
   // 检查页面路径
   if (announcement.target && announcement.target.length > 0) {
     const currentPath = route.path
-    return announcement.target.some(path => 
-      currentPath === path || currentPath.startsWith(path)
+    const isMatched = announcement.target.some(targetPath => 
+      isPathMatched(currentPath, targetPath)
     )
+    
+    // 调试信息（开发环境）
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🔍 公告路径匹配调试 [${announcement.id}]:`, {
+        currentPath: currentPath,
+        targetPaths: announcement.target,
+        isMatched: isMatched,
+        matchDetails: announcement.target.map(target => ({
+          target,
+          matched: isPathMatched(currentPath, target)
+        }))
+      })
+    }
+    
+    return isMatched
   }
   
   return true
