@@ -6,8 +6,8 @@
     :class="{ 'notice-hidden': !visible }"
   >
     <div class="notice-fcontent">
-      <h3 class="notice-ftitle">📢 {{ title }}</h3>
-      <p class="notice-ftext">{{ content }}</p>
+      <h3 class="notice-ftitle">📢 {{ ftitle }}</h3>
+      <p class="notice-ftext">{{ fcontent }}</p>
       <button 
         class="notice-close" 
         @click="handleClose"
