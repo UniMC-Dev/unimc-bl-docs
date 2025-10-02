@@ -42,10 +42,11 @@ provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
 
 <template>
   <DefaultTheme.Layout v-bind="$attrs">
-
     <!-- doc-footer-before插槽 -->
-
   </DefaultTheme.Layout>
+  
+  <!-- 公告系统 -->
+  <AnnouncementSystem />
 </template>
 <style scoped>
 </style>

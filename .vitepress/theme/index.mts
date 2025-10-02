@@ -4,7 +4,7 @@ import Linkcard from "./components/Linkcard.vue";
 import CommandExplorer from './components/CommandExplorer.vue';
 import { h } from 'vue';
 import Mylayout from "./components/Mylayout.vue";
-import announcementtoast from "./components/announcementtoast.vue";
+import { install as installAnnouncementPlugin } from './plugins/announcement';
 
 export default {
   ...DefaultTheme,
@@ -18,7 +18,9 @@ export default {
     app.component('Linkcard', Linkcard);
     app.component('CommandExplorer', CommandExplorer);
     app.component('MyLayout', Mylayout);
-    app.component('Fannouncementtoast', announcementtoast);
+    
+    // 安装公告插件
+    installAnnouncementPlugin(app);
   }
 
 }
