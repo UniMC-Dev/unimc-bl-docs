@@ -1,5 +1,50 @@
 /* .vitepress/theme/style/custom-block.css */
 /* 深浅色卡 */
+/* 在blur.css或自定义样式文件中添加 */
+
+/* 基础设置：解决电脑端侧边栏渐变问题 */
+:root {
+  --vp-c-bg: transparent; /* 电脑端使用透明背景 */
+}
+
+/* 深色模式下的基础设置 */
+.dark {
+  --vp-c-bg: transparent; /* 深色模式下也使用透明背景 */
+}
+
+/* 针对手机端的特殊处理 */
+@media (max-width: 768px) {
+  :root {
+    --vp-c-bg: rgba(255, 255, 255, 0.85); /* 手机端浅色背景带透明度 */
+  }
+  
+  .dark {
+    --vp-c-bg: rgba(15, 15, 15, 0.85); /* 手机端深色背景带透明度 */
+  }
+  
+  /* 确保手机端导航栏文字清晰可见 */
+  .VPNavBar.screen-open {
+    background-color: var(--vp-c-bg);
+    backdrop-filter: blur(10px); /* 增强文字可读性 */
+  }
+  
+  /* 手机端侧边栏背景 */
+  .VPNavScreen {
+    background-color: var(--vp-c-bg);
+  }
+}
+
+/* 确保电脑端侧边栏无渐变 */
+@media (min-width: 769px) {
+  .VPAside {
+    background-color: transparent !important;
+  }
+  
+  /* 移除侧边栏可能存在的渐变效果 */
+  .VPAside::after {
+    display: none !important;
+  }
+}
 :root {
     --vp-home-hero-name-color: #14408e;
     --vp-button-brand-border: #14408e;
@@ -198,5 +243,6 @@
     left: -5px;
     top: -1px;
 }
+
 
 
