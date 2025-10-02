@@ -17,12 +17,18 @@ hero:
       text: 了解UNIMC
       link: https://mc.clami.fun
 
-announcement:
-  title: "📢 最新公告"
-  content: "服务器公告。"
-  date: "2025/10/2"
-  link: "/docs/logs.md"
-  linkText: "查看详情"
+<div class="announcement-container">
+  <div class="announcement-header">
+    <h3 class="announcement-title">📢 最新公告</h3>
+    <span class="announcement-date">2025-10-2</span>
+  </div>
+  <p class="announcement-content">
+    服务器公告。
+  </p>
+  <a href="/docs/logs.md" class="announcement-link">
+    查看详情 →
+  </a>
+</div>
 
 features:
   - icon: <?xml version="1.0" encoding="UTF-8"?><svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 8C8.92487 8 4 12.9249 4 19C4 30 17 40 24 42.3262C31 40 44 30 44 19C44 12.9249 39.0751 8 33 8C29.2797 8 25.9907 9.8469 24 12.6738C22.0093 9.8469 18.7203 8 15 8Z" fill="none" stroke="#ff0000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
