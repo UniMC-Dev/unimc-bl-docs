@@ -19,7 +19,7 @@
 ![图片](/public/server_enter.png "进")
 ![图片](/public/enter_code.png "输")
 :::
-<Linkcard url="/docs/mclume/index.md" title="MCLUME WIKI" description="快速跳转" logo="/mlicon.png"/>
+<Linkcard url="/docs/mclume/" title="MCLUME WIKI" description="快速跳转" logo="/mlicon.png"/>
  
 <Linkcard url="https://mcmbs.dpdns.org/" title="MCBUCKET [SUPER] WIKI" description="快速跳转" logo="/mbicon.png"/>
 
@@ -36,6 +36,7 @@
  
 
 **৹ Yuluo**
+
 
 
 
