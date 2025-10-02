@@ -3,7 +3,12 @@
     v-if="visible" 
     class="custom-toast"
     :class="{ 'show': visible }"
+    @mousemove="handleMouseMove"
+    @mouseleave="handleMouseLeave"
   >
+    <!-- 鼠标跟随光效元素 -->
+    <div class="light-effect" :style="lightEffectStyle"></div>
+    
     <h3 class="notice-title">📢 {{ title }}</h3>
     <p class="notice-text">{{ content }}</p>
     <button 
@@ -20,7 +25,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, reactive } from 'vue'
 import { useData } from 'vitepress'
 
 // 引入VitePress的深色模式状态
@@ -41,9 +46,36 @@ const props = defineProps({
 })
 
 const visible = ref(true)
+const lightEffectStyle = reactive({
+  opacity: 0,
+  left: '0px',
+  top: '0px',
+  transform: 'translate(-50%, -50%)'
+})
 
 const handleClose = () => {
   visible.value = false
+}
+
+// 处理鼠标移动，实现光效跟随
+const handleMouseMove = (e) => {
+  const rect = e.currentTarget.getBoundingClientRect()
+  const x = e.clientX - rect.left
+  const y = e.clientY - rect.top
+  
+  lightEffectStyle.left = `${x}px`
+  lightEffectStyle.top = `${y}px`
+  lightEffectStyle.opacity = 1
+  
+  // 清除之前的延迟
+  clearTimeout(window.lightEffectTimeout)
+}
+
+// 鼠标离开时淡出光效
+const handleMouseLeave = () => {
+  window.lightEffectTimeout = setTimeout(() => {
+    lightEffectStyle.opacity = 0
+  }, 300)
 }
 
 onMounted(() => {
@@ -65,17 +97,15 @@ watch(isDark, () => {
 
 <style scoped>
 .custom-toast {
-  /* 保持细长造型同时优化比例 */
   min-height: 48px;
-  min-width: 280px;
-  max-width: 90vw;
+  width: auto;
   border-radius: 24px;
   
-  /* 修复透明度问题 - 使用更低的alpha值并确保无背景覆盖 */
-  background: rgba(50, 50, 50, 0.7); /* 降低不透明度 */
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1); /* 增加边框避免边缘融合 */
+  /* 毛玻璃效果 - 浅色模式 */
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   
   position: fixed;
   bottom: 2rem;
@@ -83,25 +113,34 @@ watch(isDark, () => {
   transform: translateX(-50%) translateY(100px);
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0 20px;
+  gap: 0.5rem;
+  padding: 0 16px;
   
-  color: #fff;
+  color: #333;
   font-size: 14px;
   font-weight: 500;
   overflow: hidden;
-  text-overflow: ellipsis;
   
   opacity: 0;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 99999; /* 提高层级避免被覆盖 */
-  pointer-events: none;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 99999;
+  pointer-events: auto;
+  
+  /* 默认状态 - 只显示标题 */
+  max-width: fit-content;
 }
 
 /* 显示状态动画 */
 .custom-toast.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+/* 鼠标悬停时展开 */
+.custom-toast:hover {
+  padding: 0 20px;
+  max-width: 90vw;
+  gap: 0.75rem;
 }
 
 .notice-title {
@@ -111,6 +150,7 @@ watch(isDark, () => {
   display: flex;
   align-items: center;
   gap: 0.35rem;
+  white-space: nowrap;
 }
 
 .notice-text {
@@ -119,13 +159,22 @@ watch(isDark, () => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: 1; /* 确保文本区域自适应 */
+  flex: 0;
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 鼠标悬停时显示文本 */
+.custom-toast:hover .notice-text {
+  opacity: 1;
+  flex: 1;
+  margin: 0 8px;
 }
 
 .notice-close {
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(50, 50, 50, 0.7);
   cursor: pointer;
   width: 24px;
   height: 24px;
@@ -133,15 +182,35 @@ watch(isDark, () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
   padding: 0;
   pointer-events: auto;
+  opacity: 0;
+  transform: scale(0.8) rotate(0deg);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 鼠标悬停时显示关闭按钮 */
+.custom-toast:hover .notice-close {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
 }
 
 .notice-close:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #333;
   transform: rotate(90deg);
+}
+
+/* 鼠标跟随光效 */
+.light-effect {
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  transition: opacity 0.5s ease, transform 0.1s ease-out;
+  z-index: -1;
 }
 
 /* 响应式调整 */
@@ -149,17 +218,29 @@ watch(isDark, () => {
   .custom-toast {
     bottom: 1.5rem;
     min-height: 44px;
-    padding: 0 16px;
   }
 }
 </style>
 
-<!-- 单独的非scoped样式处理深色模式，提高选择器优先级 -->
+<!-- 深色模式样式 -->
 <style>
-/* 深色模式适配 - 使用直接选择器而非deep，提高优先级 */
+/* 深色模式适配 - 毛玻璃效果 */
 html.dark .custom-toast {
-  background: rgba(30, 30, 30, 0.9) !important;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
-  border-color: rgba(255, 255, 255, 0.05) !important;
+  background: rgba(30, 30, 30, 0.7) !important;
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .notice-close {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+html.dark .notice-close:hover {
+  color: #fff !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .light-effect {
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%) !important;
 }
 </style>
