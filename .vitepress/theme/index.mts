@@ -4,7 +4,7 @@ import Linkcard from "./components/Linkcard.vue";
 import CommandExplorer from './components/CommandExplorer.vue';
 import { h } from 'vue';
 import Mylayout from "./components/Mylayout.vue";
-import anouncement from "./style/anouncement.vue";
+import FloatingNotice from "./components/FloatingNotice.vue";
 
 export default {
   ...DefaultTheme,
@@ -21,3 +21,4 @@ export default {
   }
 
 }
+
