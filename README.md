@@ -49,24 +49,6 @@
 ### 打包发布（准备上架服务器）
 npm run docs:build  # 打包成静态文件（就像把物品放进箱子）
 npm run docs:preview  # 预览打包结果（开箱检查）
-## 文件夹长啥样？
-unimc-bl-docs/
-├── docs/
-│   ├── all/
-│   ├── mcbucket/
-│   └── mclume/
-├── public/
-├── .vitepress/
-│   ├── config.mts
-│   ├── theme/
-│   │   ├── style/
-│   │   │   ├── blockquot
-│   │   │   ├── custom-block.css
-│   │   │   └── var.css
-│   │   └── plugins/
-│   │       └── announcement/
-├── package.json
-└── LICENSE
 ## 公告插件咋玩？
 
 这插件比红石电路简单，看一眼就会：
