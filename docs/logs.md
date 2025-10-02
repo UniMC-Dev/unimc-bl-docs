@@ -6,6 +6,16 @@ import Timeline from '/vercel/path0/.vitepress/theme/components/Timeline.vue'
 
 // 时间线数据
 const timelineData = [
+    {
+    date: '2025/10/02',
+    title: '美化文档',
+    details: [
+      '修改背景图',
+      '修改首页图',
+      '修改icon',
+      '添加公告系统'
+    ]
+  },
   {
     date: '2025/10/01',
     title: '文档大修改',
