@@ -4,6 +4,7 @@ import Linkcard from "./components/Linkcard.vue";
 import CommandExplorer from './components/CommandExplorer.vue';
 import { h } from 'vue';
 import Mylayout from "./components/Mylayout.vue";
+import anouncement from "./style/anouncement.vue";
 
 export default {
   ...DefaultTheme,
@@ -18,4 +19,5 @@ export default {
     app.component('CommandExplorer', CommandExplorer);
     app.component('MyLayout', Mylayout);
   }
+
 }
