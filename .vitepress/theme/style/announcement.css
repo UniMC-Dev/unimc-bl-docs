@@ -1,4 +1,4 @@
-<!-- .vitepress/theme/components/FloatingNotice.vue -->
+<!-- .vitepress/theme/components/announcement.vue -->
 <template>
   <div 
     v-if="visible" 
