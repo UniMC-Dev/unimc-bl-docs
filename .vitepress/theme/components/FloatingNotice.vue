@@ -42,6 +42,11 @@ const props = defineProps({
   duration: {
     type: Number,
     default: 0 // 0表示不自动关闭
+  },
+  // 新增属性：是否始终显示内容
+  alwaysShowContent: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -111,7 +116,7 @@ watch(isDark, () => {
 <style scoped>
 .custom-toast {
   min-height: 48px;
-  width: auto; /* 基础宽度自动适应 */
+  width: auto;
   border-radius: 24px;
   
   /* 液态玻璃效果 */
@@ -135,16 +140,12 @@ watch(isDark, () => {
   color: #fff;
   font-size: 14px;
   font-weight: 500;
-  overflow: hidden;
+  overflow: visible; /* 确保内容不会被裁剪 */
   
   opacity: 0;
-  /* 增加宽度过渡动画 */
   transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
   z-index: 99999;
   pointer-events: auto;
-  
-  /* 缩起时仅适应标题宽度 */
-  max-width: calc(100% - 2rem);
 }
 
 /* 进入动画 */
@@ -164,7 +165,6 @@ watch(isDark, () => {
   padding: 0 20px;
   gap: 0.75rem;
   justify-content: flex-start;
-  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
   box-shadow: 0 6px 35px rgba(0, 0, 0, 0.1),
               inset 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
@@ -188,19 +188,21 @@ watch(isDark, () => {
   flex: 0;
   opacity: 0;
   width: 0;
-  /* 文本宽度过渡 */
-  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition: all 0.3s ease-out; /* 更平滑的过渡效果 */
 }
 
 /* 展开时显示文本并自动适应宽度 */
-.custom-toast:hover .notice-text {
+.custom-toast:hover .notice-text,
+/* 始终显示内容的情况 */
+.custom-toast.always-show .notice-text {
   opacity: 1;
   flex: 1;
   width: auto;
   margin: 0 8px;
-  max-width: calc(90vw - 120px); /* 限制最大宽度避免溢出 */
+  max-width: calc(90vw - 120px);
 }
 
+/* 关闭按钮样式 */
 .notice-close {
   background: transparent;
   border: none;
@@ -216,10 +218,11 @@ watch(isDark, () => {
   pointer-events: auto;
   opacity: 0;
   transform: scale(0.8);
-  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition: all 0.3s ease-out;
 }
 
-.custom-toast:hover .notice-close {
+.custom-toast:hover .notice-close,
+.custom-toast.always-show .notice-close {
   opacity: 1;
   transform: scale(1);
 }
@@ -238,8 +241,8 @@ watch(isDark, () => {
   background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 70%);
   border-radius: 50%;
   pointer-events: none;
-  transition: opacity 0.5s cubic-bezier(0.25, 0.1, 0.25, 1), 
-              transform 0.15s cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition: opacity 0.5s ease-out, 
+              transform 0.15s ease-out;
   z-index: -1;
 }
 
@@ -250,7 +253,8 @@ watch(isDark, () => {
     min-height: 44px;
   }
   
-  .custom-toast:hover .notice-text {
+  .custom-toast:hover .notice-text,
+  .custom-toast.always-show .notice-text {
     max-width: calc(90vw - 100px);
   }
 }
