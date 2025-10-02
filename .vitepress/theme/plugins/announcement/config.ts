@@ -47,7 +47,7 @@ export const announcements: AnnouncementConfig[] = [
     closable: true,
     duration: 6000,
     position: 'top',
-    target: ['/', '/docs/logs.md']
+    target: ['/', '/docs/logs.html']
   },
 
   // 节日活动公告
