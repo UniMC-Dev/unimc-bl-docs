@@ -1,38 +1,67 @@
 <template>
   <div 
     v-if="visible" 
-    class="toast-notice"
+    class="custom-toast"
   >
-    <div class="notice-content">
-      <h3 class="notice-title">📢 {{ title }}</h3>
-      <p class="notice-text">{{ content }}</p>
-      <button 
-        class="notice-close" 
-        @click="handleClose"
-        aria-label="关闭公告"
-      >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </button>
-    </div>
+    <h3 class="notice-title">📢 {{ title }}</h3>
+    <p class="notice-text">{{ content }}</p>
+    <button 
+      class="notice-close" 
+      @click="handleClose"
+      aria-label="关闭公告"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
   </div>
 </template>
 
-<style scoped>
-<!-- 细长型Toast组件 -->
-<div class="custom-toast" id="customToast">
-  <span class="toast-text">操作成功</span>
-</div>
+<script setup>
+import { ref, onMounted } from 'vue'
 
-<style>
+// 组件属性定义
+const props = defineProps({
+  title: {
+    type: String,
+    default: '最新公告'
+  },
+  content: {
+    type: String,
+    required: true
+  },
+  duration: {
+    type: Number,
+    default: 0 // 0表示不自动关闭
+  }
+})
+
+// 状态管理 - 仅使用内存状态
+const visible = ref(true)
+
+// 关闭公告
+const handleClose = () => {
+  visible.value = false
+}
+
+// 自动关闭功能
+onMounted(() => {
+  if (props.duration > 0) {
+    setTimeout(() => {
+      visible.value = false
+    }, props.duration)
+  }
+})
+</script>
+
+<style scoped>
 .custom-toast {
   /* 细长胶囊造型 */
-  height: 36px;
+  height: 48px;
   min-width: 280px;
   max-width: 90vw;
-  border-radius: 18px; /* 高度的一半实现完全圆角 */
+  border-radius: 24px; /* 高度的一半实现完全圆角 */
   
   /* 半透明背景 + 毛玻璃效果 */
   background: rgba(50, 50, 50, 0.85);
@@ -41,19 +70,19 @@
   
   /* 居中布局 */
   position: fixed;
-  top: 24px;
+  bottom: 2rem;
   left: 50%;
-  transform: translateX(-50%) translateY(-100px);
+  transform: translateX(-50%) translateY(100px);
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.75rem;
   padding: 0 20px;
   
   /* 文字样式 */
   color: #fff;
   font-size: 14px;
   font-weight: 500;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   
@@ -65,28 +94,90 @@
 }
 
 /* 显示状态 */
-.custom-toast.show {
+.custom-toast {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
 
+.notice-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.notice-text {
+  margin: 0;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notice-close {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+  pointer-events: auto;
+}
+
+.notice-close:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transform: rotate(90deg);
+}
+
 /* 深色模式适配 */
-.dark .custom-toast {
+:deep(.dark) .custom-toast {
   background: rgba(30, 30, 30, 0.9);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
-</style>
 
-<script>
-// 显示Toast的函数
-function showToast(message, duration = 2000) {
-  const toast = document.getElementById('customToast');
-  toast.querySelector('.toast-text').textContent = message;
-  toast.classList.add('show');
-  
-  // 自动隐藏
-  setTimeout(() => {
-    toast.classList.remove('show');
-  }, duration);
+/* 动画效果 */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 100px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 }
-</script>
+
+/* 关闭动画 */
+.custom-toast-leave-active {
+  animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, 100px);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .custom-toast {
+    bottom: 1.5rem;
+    height: 44px;
+    padding: 0 16px;
+  }
+}
+</style>
