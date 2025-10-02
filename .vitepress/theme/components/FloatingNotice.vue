@@ -2,6 +2,7 @@
   <div 
     v-if="visible" 
     class="custom-toast"
+    :class="{ 'toast-visible': visible }"
   >
     <h3 class="notice-title">📢 {{ title }}</h3>
     <p class="notice-text">{{ content }}</p>
@@ -63,8 +64,8 @@ onMounted(() => {
   max-width: 90vw;
   border-radius: 24px; /* 高度的一半实现完全圆角 */
   
-  /* 半透明背景 + 毛玻璃效果 */
-  background: rgba(50, 50, 50, 0.85);
+  /* 半透明背景 + 毛玻璃效果 - 降低不透明度至70% */
+  background: rgba(50, 50, 50, 0.7);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   
@@ -72,7 +73,6 @@ onMounted(() => {
   position: fixed;
   bottom: 2rem;
   left: 50%;
-  transform: translateX(-50%) translateY(100px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -86,15 +86,18 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   
-  /* 动画效果 */
+  /* 初始状态 - 隐藏 */
   opacity: 0;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 9999;
+  transform: translateX(-50%) translateY(100px);
   pointer-events: none;
+  z-index: 9999;
+  
+  /* 动画过渡 */
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* 显示状态 */
-.custom-toast {
+/* 显示状态 - 触发动画 */
+.custom-toast.toast-visible {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
@@ -138,38 +141,10 @@ onMounted(() => {
   transform: rotate(90deg);
 }
 
-/* 深色模式适配 */
+/* 深色模式适配 - 半透明调整 */
 :deep(.dark) .custom-toast {
-  background: rgba(30, 30, 30, 0.9);
+  background: rgba(30, 30, 30, 0.7);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-}
-
-/* 动画效果 */
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 100px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-}
-
-/* 关闭动画 */
-.custom-toast-leave-active {
-  animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-  to {
-    opacity: 0;
-    transform: translate(-50%, 100px);
-  }
 }
 
 /* 响应式设计 */
